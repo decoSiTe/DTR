@@ -371,7 +371,7 @@
     <div class="topbar no-print">
       <div>
         <h1>Daily Time Record System</h1>
-        <p class="subtitle">Single-file index.html for GitHub Pages. Employees scan QR, tap an action, and data saves to Google Sheets.</p>
+        <p class="subtitle">Single-file index.html for GitHub Pages. Employees scan QR and tap an action to record their time.</p>
       </div>
       <div class="actions">
         <button class="btn" id="openAddEmployeeBtn">Add Employee</button>
@@ -384,7 +384,6 @@
     <div class="tabs no-print">
       <button class="tab active" data-tab="adminTab">Admin Panel</button>
       <button class="tab" data-tab="employeeTab">Employee Kiosk</button>
-      <button class="tab" data-tab="integrationTab">Google Sheets</button>
     </div>
 
     <section id="adminTab" class="tab-panel active">
@@ -522,11 +521,10 @@
       <div class="grid grid-2">
         <div class="card">
           <h3>Employee QR Kiosk</h3>
-          <p class="desc">Employee scans QR, taps Arrived, Break Start, Break End, or Departure. The app records the real time and saves to Google Sheets.</p>
+          <p class="desc">Employee scans QR, taps Arrived, Break Start, Break End, or Departure. The app records the real time.</p>
 
           <div>
             <span class="pill">Realtime timestamp</span>
-            <span class="pill" id="sheetConnectPill">Google Sheets not connected</span>
           </div>
 
           <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
@@ -568,42 +566,7 @@
       </div>
     </section>
 
-    <section id="integrationTab" class="tab-panel no-print">
-      <div class="grid grid-2">
-        <div class="card">
-          <h3>Google Sheets Integration</h3>
-          <p class="desc">Paste your Google Apps Script Web App URL. Each employee action updates one row per employee per day in Google Sheets.</p>
-          <div class="field">
-            <label for="sheetWebhookUrl">Google Apps Script Web App URL</label>
-            <input id="sheetWebhookUrl" placeholder="https://script.google.com/macros/s/.../exec" />
-          </div>
-          <div class="field" style="margin-top:14px;">
-            <label for="qrBaseUrl">Employee QR Base URL</label>
-            <input id="qrBaseUrl" placeholder="https://your-username.github.io/your-repo/" />
-          </div>
-          <div class="status" style="margin-top:14px;">
-            <strong>Recommended Google Sheet columns</strong><br />
-            Date | Employee Code | Employee Name | Department | Position | Arrival | Break Start | Break End | Departure | Last Action | Timestamp | Source
-          </div>
-        </div>
 
-        <div class="card">
-          <h3>Google Apps Script</h3>
-          <p class="desc">Create a Google Sheet, open Apps Script, paste this code, deploy as a Web App, then paste the URL in this app.</p>
-          <textarea id="appsScriptCode" readonly></textarea>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:20px;">
-        <h3>How the QR flow works</h3>
-        <div class="steps" style="margin-top:14px;">
-          <div class="step"><div class="step-title">1. Admin creates employee</div><p>Each employee has a unique employee code and QR link.</p></div>
-          <div class="step"><div class="step-title">2. Employee scans QR</div><p>The QR opens this same index.html with the employee code in the URL.</p></div>
-          <div class="step"><div class="step-title">3. Employee taps action</div><p>Arrived, Break Start, Break End, or Departure.</p></div>
-          <div class="step"><div class="step-title">4. Google Sheet updates</div><p>The app sends the data to Apps Script, which updates one row for that employee and date.</p></div>
-        </div>
-      </div>
-    </section>
   </div>
 
   <div class="modal" id="employeeModal">
@@ -960,82 +923,6 @@
       `).join("");
     }
 
-    function renderIntegration() {
-      document.getElementById("sheetWebhookUrl").value = state.sheetWebhookUrl || "";
-      document.getElementById("qrBaseUrl").value = state.qrBaseUrl || "";
-      const connected = !!state.sheetWebhookUrl;
-      const pill = document.getElementById("sheetConnectPill");
-      pill.textContent = connected ? "Google Sheets connected" : "Google Sheets not connected";
-      pill.classList.toggle("success", connected);
-
-      document.getElementById("appsScriptCode").value = `function doPost(e) {
-  var sheet = SpreadsheetApp.openById("YOUR_SHEET_ID").getSheetByName("DTR");
-  var data = JSON.parse(e.postData.contents);
-
-  var values = sheet.getDataRange().getValues();
-  var headers = values[0] || [];
-  if (headers.length === 0) {
-    sheet.appendRow([
-      "Date",
-      "Employee Code",
-      "Employee Name",
-      "Department",
-      "Position",
-      "Arrival",
-      "Break Start",
-      "Break End",
-      "Departure",
-      "Last Action",
-      "Timestamp",
-      "Source"
-    ]);
-    values = sheet.getDataRange().getValues();
-  }
-
-  var date = data.date;
-  var employeeCode = data.employeeCode;
-  var rowIndex = -1;
-
-  for (var i = 1; i < values.length; i++) {
-    if (values[i][0] == date && values[i][1] == employeeCode) {
-      rowIndex = i + 1;
-      break;
-    }
-  }
-
-  if (rowIndex === -1) {
-    sheet.appendRow([
-      data.date,
-      data.employeeCode,
-      data.employeeName,
-      data.department,
-      data.position,
-      data.arrival || "",
-      data.breakStart || "",
-      data.breakEnd || "",
-      data.departure || "",
-      data.lastAction || "",
-      data.timestamp || "",
-      data.source || "qr-kiosk"
-    ]);
-  } else {
-    sheet.getRange(rowIndex, 3).setValue(data.employeeName || "");
-    sheet.getRange(rowIndex, 4).setValue(data.department || "");
-    sheet.getRange(rowIndex, 5).setValue(data.position || "");
-    sheet.getRange(rowIndex, 6).setValue(data.arrival || "");
-    sheet.getRange(rowIndex, 7).setValue(data.breakStart || "");
-    sheet.getRange(rowIndex, 8).setValue(data.breakEnd || "");
-    sheet.getRange(rowIndex, 9).setValue(data.departure || "");
-    sheet.getRange(rowIndex, 10).setValue(data.lastAction || "");
-    sheet.getRange(rowIndex, 11).setValue(data.timestamp || "");
-    sheet.getRange(rowIndex, 12).setValue(data.source || "qr-kiosk");
-  }
-
-  return ContentService
-    .createTextOutput(JSON.stringify({ ok: true }))
-    .setMimeType(ContentService.MimeType.JSON);
-}`;
-    }
 
     function renderKioskFromUrl() {
       const params = new URLSearchParams(location.search);
@@ -1062,23 +949,6 @@
       card.style.display = "block";
       empty.style.display = "none";
       return employee;
-    }
-
-    async function syncToGoogleSheets(payload) {
-      if (!state.sheetWebhookUrl) {
-        return { ok: false, message: "Saved locally. Add your Google Apps Script Web App URL to sync with Google Sheets." };
-      }
-      try {
-        const res = await fetch(state.sheetWebhookUrl, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
-        });
-        if (!res.ok) throw new Error("Webhook failed");
-        return { ok: true, message: "Saved locally and synced to Google Sheets." };
-      } catch (error) {
-        return { ok: false, message: "Saved locally, but Google Sheets sync failed. Check your Apps Script deployment and access settings." };
-      }
     }
 
     async function handleEmployeeAction(actionKey) {
@@ -1127,9 +997,7 @@
       state.logs = state.logs.slice(0, 100);
       saveState();
 
-      const sync = await syncToGoogleSheets(payload);
-      setStatus("syncMessage", sync.message, true);
-      setStatus("kioskStatus", `${employee.name} • ${actionLabels[actionKey]} saved at ${time}. ${sync.message}`, true);
+      setStatus("kioskStatus", `${employee.name} • ${actionLabels[actionKey]} saved at ${time}.`, true);
 
       renderAll();
 
@@ -1286,18 +1154,6 @@
         renderAll();
       });
 
-      document.getElementById("sheetWebhookUrl").addEventListener("input", (e) => {
-        state.sheetWebhookUrl = e.target.value.trim();
-        saveState();
-        renderIntegration();
-      });
-
-      document.getElementById("qrBaseUrl").addEventListener("input", (e) => {
-        state.qrBaseUrl = e.target.value.trim() || `${location.origin}${location.pathname}`;
-        saveState();
-        renderQR();
-      });
-
       document.getElementById("manualEmployeeCode").addEventListener("input", (e) => {
         renderKioskEmployee(e.target.value.trim().toUpperCase());
       });
@@ -1331,7 +1187,6 @@
       renderSheet();
       renderQR();
       renderLogs();
-      renderIntegration();
       renderKioskEmployee(document.getElementById("manualEmployeeCode").value.trim().toUpperCase());
     }
 
