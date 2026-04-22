@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DTR QR System</title>
+  <script src="https://unpkg.com/html5-qrcode" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer></script>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #dbe4ee;
+      --primary: #0f172a;
+      --primary-2: #1e293b;
+      --soft: #f1f5f9;
+      --danger: #dc2626;
+      --success: #15803d;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    h1, h2, h3, h4, p { margin: 0; }
+    .subtitle { color: var(--muted); margin-top: 6px; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      border: none;
+      background: var(--primary);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 16px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn:hover { background: var(--primary-2); }
+    .btn.secondary {
+      background: white;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn.danger {
+      background: var(--danger);
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 12px 18px;
+      border-radius: 16px;
+      background: white;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .tab.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .grid {
+      display: grid;
+      gap: 20px;
+    }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-5 { grid-template-columns: 1.1fr 1.4fr; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+    .card h3 { margin-bottom: 6px; }
+    .card .desc { color: var(--muted); margin-bottom: 16px; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .field.full { grid-column: 1 / -1; }
+    label { font-size: 14px; font-weight: 700; }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      background: white;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    .mini-cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .mini-card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 12px;
+      background: #fff;
+    }
+    .mini-card .k { color: var(--muted); font-size: 13px; }
+    .mini-card .v { margin-top: 6px; font-weight: 700; }
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      max-height: 560px;
+      background: white;
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; }
+    th, td { border-bottom: 1px solid var(--border); padding: 10px; text-align: left; font-size: 14px; }
+    th { background: var(--soft); position: sticky; top: 0; z-index: 1; }
+    .weekday-badge { color: var(--danger); font-weight: 700; }
+    .muted { color: var(--muted); }
+    .pill {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--soft);
+      font-size: 13px;
+      font-weight: 700;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    .pill.success { background: #dcfce7; color: #166534; }
+    .status {
+      margin-top: 14px;
+      border: 1px solid var(--border);
+      background: #fff;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 14px;
+    }
+    .qr-box {
+      display: flex;
+      justify-content: center;
+      padding: 12px;
+      border-radius: 22px;
+      border: 1px solid var(--border);
+      background: white;
+    }
+    .qr-canvas-wrap {
+      width: 230px;
+      height: 230px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .code-line {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--soft);
+      padding: 12px;
+      word-break: break-all;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .action-btn {
+      height: 56px;
+      border-radius: 16px;
+      border: none;
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .action-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .scanner-box {
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--soft);
+      padding: 14px;
+    }
+    #reader {
+      width: 100%;
+      max-width: 360px;
+      overflow: hidden;
+      border-radius: 16px;
+    }
+    .log-list {
+      max-height: 320px;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: white;
+    }
+    .log-item {
+      padding: 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .log-item:last-child { border-bottom: none; }
+    .log-badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--soft);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .step {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      background: white;
+    }
+    .step-title { font-weight: 700; }
+    .step p { color: var(--muted); margin-top: 8px; font-size: 14px; }
+    .sheet {
+      margin-top: 24px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+      color: black;
+    }
+    .sheet-top-small { font-size: 13px; }
+    .sheet-title { text-align: center; font-size: 42px; font-weight: 700; margin-top: 6px; }
+    .sheet-name {
+      margin-top: 34px;
+      border-bottom: 2px solid black;
+      padding-bottom: 6px;
+      text-align: center;
+      font-size: 28px;
+    }
+    .sheet-name-note { text-align: center; font-size: 14px; margin-top: 4px; }
+    .sheet-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+      align-items: end;
+    }
+    .sheet-meta-left { font-style: italic; font-size: 22px; }
+    .sheet-meta-right-title {
+      border-bottom: 2px solid black;
+      text-align: center;
+      font-size: 34px;
+      font-weight: 700;
+      padding-bottom: 4px;
+    }
+    .sheet-meta-right-sub {
+      text-align: center;
+      font-style: italic;
+      font-size: 24px;
+      margin-top: 4px;
+      line-height: 1.1;
+    }
+    .sheet-table-wrap { margin-top: 18px; border: 2px solid black; overflow: auto; }
+    .sheet-table { width: 100%; min-width: 860px; border-collapse: collapse; }
+    .sheet-table th, .sheet-table td {
+      border: 1px solid black;
+      text-align: center;
+      padding: 8px 6px;
+      font-size: 15px;
+      background: white;
+      position: static;
+    }
+    .sheet-total { font-size: 30px; font-weight: 500; }
+    .red { color: #ef4444; font-weight: 700; }
+    .hidden { display: none !important; }
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+    }
+    .modal.open { display: flex; }
+    .modal-card {
+      width: 100%;
+      max-width: 760px;
+      background: white;
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 1024px) {
+      .grid-2, .grid-3, .grid-5, .steps { grid-template-columns: 1fr; }
+      .mini-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .sheet-meta { grid-template-columns: 1fr; }
+      .sheet-title { font-size: 30px; }
+      .sheet-name { font-size: 22px; }
+      .sheet-meta-left, .sheet-meta-right-sub { font-size: 18px; }
+      .sheet-meta-right-title { font-size: 26px; }
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      #printSheet, #printSheet * { visibility: visible; }
+      #printSheet {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
+        margin: 0;
+      }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar no-print">
+      <div>
+        <h1>Daily Time Record System</h1>
+        <p class="subtitle">Single-file index.html for GitHub Pages. Employees scan QR, tap an action, and data saves to Google Sheets.</p>
+      </div>
+      <div class="actions">
+        <button class="btn" id="openAddEmployeeBtn">Add Employee</button>
+        <button class="btn secondary" id="exportCsvBtn">Export CSV</button>
+        <button class="btn secondary" id="exportJsonBtn">Export JSON</button>
+        <button class="btn" id="printBtn">Print DTR</button>
+      </div>
+    </div>
+
+    <div class="tabs no-print">
+      <button class="tab active" data-tab="adminTab">Admin Panel</button>
+      <button class="tab" data-tab="employeeTab">Employee Kiosk</button>
+      <button class="tab" data-tab="integrationTab">Google Sheets</button>
+    </div>
+
+    <section id="adminTab" class="tab-panel active">
+      <div class="grid grid-5 no-print">
+        <div class="card">
+          <h3>Employee Setup</h3>
+          <p class="desc">Manage employees and choose the month for the DTR sheet.</p>
+
+          <div class="field">
+            <label for="employeeSelect">Select Employee</label>
+            <div style="display:flex; gap:10px;">
+              <select id="employeeSelect"></select>
+              <button class="btn danger" id="deleteEmployeeBtn">Delete</button>
+            </div>
+          </div>
+
+          <div class="form-grid" style="margin-top:14px;">
+            <div class="field">
+              <label>Employee Code</label>
+              <input id="selectedCode" readonly />
+            </div>
+            <div class="field">
+              <label>Month</label>
+              <input type="month" id="monthInput" />
+            </div>
+            <div class="field">
+              <label>Department</label>
+              <input id="selectedDepartment" readonly />
+            </div>
+            <div class="field">
+              <label>Position</label>
+              <input id="selectedPosition" readonly />
+            </div>
+          </div>
+
+          <div style="margin-top:16px;">
+            <label>Official Schedule</label>
+            <div class="mini-cards">
+              <div class="mini-card"><div class="k">AM In</div><div class="v" id="schedInAM"></div></div>
+              <div class="mini-card"><div class="k">AM Out</div><div class="v" id="schedOutAM"></div></div>
+              <div class="mini-card"><div class="k">PM In</div><div class="v" id="schedInPM"></div></div>
+              <div class="mini-card"><div class="k">PM Out</div><div class="v" id="schedOutPM"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Attendance Input</h3>
+          <p class="desc">Admin can edit daily records manually.</p>
+          <div class="table-wrap">
+            <table id="attendanceTable">
+              <thead>
+                <tr>
+                  <th>Day</th>
+                  <th>Arrival</th>
+                  <th>Break Start</th>
+                  <th>Break End</th>
+                  <th>Departure</th>
+                  <th>Weekend</th>
+                  <th>Undertime</th>
+                </tr>
+              </thead>
+              <tbody id="attendanceBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-3 no-print" style="margin-top:20px;">
+        <div class="card">
+          <h3>Employee QR</h3>
+          <p class="desc">Print or share this QR. It opens the employee kiosk page for the selected employee.</p>
+          <div class="qr-box">
+            <div class="qr-canvas-wrap"><canvas id="employeeQrCanvas"></canvas></div>
+          </div>
+          <div style="margin-top:14px; font-size:14px; line-height:1.6;">
+            <div><span class="muted">Employee:</span> <strong id="qrEmployeeName"></strong></div>
+            <div><span class="muted">Code:</span> <strong id="qrEmployeeCode"></strong></div>
+          </div>
+          <div class="code-line" id="qrValueText"></div>
+        </div>
+
+        <div class="card" style="grid-column: span 2;">
+          <h3>Recent Real-Time Logs</h3>
+          <p class="desc">Latest employee actions from QR scan or direct employee link.</p>
+          <div id="syncMessage" class="status hidden"></div>
+          <div class="log-list" id="logList"></div>
+        </div>
+      </div>
+
+      <div id="printSheet" class="sheet">
+        <div class="sheet-top-small">Civil Service Form No. 48</div>
+        <div class="sheet-title">DAILY TIME RECORD</div>
+        <div class="sheet-name" id="sheetEmployeeName"></div>
+        <div class="sheet-name-note">(Name)</div>
+
+        <div class="sheet-meta">
+          <div class="sheet-meta-left">
+            <div>For the Month of</div>
+            <div style="margin-top:6px;">Official hours for arrival</div>
+            <div>and departure</div>
+          </div>
+          <div>
+            <div class="sheet-meta-right-title" id="sheetMonthTitle"></div>
+            <div class="sheet-meta-right-sub">(Regular Days</div>
+            <div class="sheet-meta-right-sub">(Saturdays</div>
+          </div>
+        </div>
+
+        <div class="sheet-table-wrap">
+          <table class="sheet-table">
+            <thead>
+              <tr>
+                <th rowspan="2">DAY</th>
+                <th colspan="2">A.M.</th>
+                <th colspan="2">P.M.</th>
+                <th colspan="2">UNDERTIME</th>
+              </tr>
+              <tr>
+                <th>Arrival</th>
+                <th>Departure</th>
+                <th>Arrival</th>
+                <th>Departure</th>
+                <th>Hours</th>
+                <th>Minutes</th>
+              </tr>
+            </thead>
+            <tbody id="sheetBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="employeeTab" class="tab-panel no-print">
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>Employee QR Kiosk</h3>
+          <p class="desc">Employee scans QR, taps Arrived, Break Start, Break End, or Departure. The app records the real time and saves to Google Sheets.</p>
+
+          <div>
+            <span class="pill">Realtime timestamp</span>
+            <span class="pill" id="sheetConnectPill">Google Sheets not connected</span>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+            <button class="btn" id="openScannerBtn">Scan QR Code</button>
+            <input id="manualEmployeeCode" placeholder="Or enter employee code" style="max-width:280px;" />
+          </div>
+
+          <div id="scannerWrap" class="scanner-box hidden">
+            <div id="reader"></div>
+            <div style="margin-top:12px;">
+              <button class="btn secondary" id="closeScannerBtn">Close Scanner</button>
+            </div>
+          </div>
+
+          <div id="employeeCard" class="card" style="margin-top:16px; background:var(--soft); display:none; box-shadow:none;">
+            <h3 id="kioskEmployeeName"></h3>
+            <p class="desc" id="kioskEmployeeMeta" style="margin-top:6px;"></p>
+            <div class="action-grid">
+              <button class="action-btn" data-action="arrival">Arrived</button>
+              <button class="action-btn" data-action="breakStart">Break Start</button>
+              <button class="action-btn" data-action="breakEnd">Break End</button>
+              <button class="action-btn" data-action="departure">Departure</button>
+            </div>
+            <div style="font-size:14px; color:var(--muted); margin-top:12px;">After selecting an action, the kiosk resets automatically.</div>
+          </div>
+
+          <div id="employeeEmpty" class="card" style="margin-top:16px; border-style:dashed; box-shadow:none; text-align:center; color:var(--muted);">
+            Scan a QR code or enter employee code to show the action menu.
+          </div>
+
+          <div id="kioskStatus" class="status hidden"></div>
+        </div>
+
+        <div class="card">
+          <h3>Kiosk QR Link Format</h3>
+          <p class="desc">This is the format used for each employee QR code.</p>
+          <div class="code-line" id="kioskQrFormat"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="integrationTab" class="tab-panel no-print">
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>Google Sheets Integration</h3>
+          <p class="desc">Paste your Google Apps Script Web App URL. Each employee action updates one row per employee per day in Google Sheets.</p>
+          <div class="field">
+            <label for="sheetWebhookUrl">Google Apps Script Web App URL</label>
+            <input id="sheetWebhookUrl" placeholder="https://script.google.com/macros/s/.../exec" />
+          </div>
+          <div class="field" style="margin-top:14px;">
+            <label for="qrBaseUrl">Employee QR Base URL</label>
+            <input id="qrBaseUrl" placeholder="https://your-username.github.io/your-repo/" />
+          </div>
+          <div class="status" style="margin-top:14px;">
+            <strong>Recommended Google Sheet columns</strong><br />
+            Date | Employee Code | Employee Name | Department | Position | Arrival | Break Start | Break End | Departure | Last Action | Timestamp | Source
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Google Apps Script</h3>
+          <p class="desc">Create a Google Sheet, open Apps Script, paste this code, deploy as a Web App, then paste the URL in this app.</p>
+          <textarea id="appsScriptCode" readonly></textarea>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <h3>How the QR flow works</h3>
+        <div class="steps" style="margin-top:14px;">
+          <div class="step"><div class="step-title">1. Admin creates employee</div><p>Each employee has a unique employee code and QR link.</p></div>
+          <div class="step"><div class="step-title">2. Employee scans QR</div><p>The QR opens this same index.html with the employee code in the URL.</p></div>
+          <div class="step"><div class="step-title">3. Employee taps action</div><p>Arrived, Break Start, Break End, or Departure.</p></div>
+          <div class="step"><div class="step-title">4. Google Sheet updates</div><p>The app sends the data to Apps Script, which updates one row for that employee and date.</p></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal" id="employeeModal">
+    <div class="modal-card">
+      <h3>Add Employee</h3>
+      <p class="desc">Create an employee for admin view and QR kiosk access.</p>
+      <div class="form-grid">
+        <div class="field">
+          <label>Employee Code</label>
+          <input id="modalCode" placeholder="EMP001" />
+        </div>
+        <div class="field">
+          <label>Name</label>
+          <input id="modalName" placeholder="Employee name" />
+        </div>
+        <div class="field">
+          <label>Position</label>
+          <input id="modalPosition" placeholder="Position" />
+        </div>
+        <div class="field">
+          <label>Department</label>
+          <input id="modalDepartment" placeholder="Department" />
+        </div>
+        <div class="field">
+          <label>AM Arrival</label>
+          <input type="time" id="modalInAM" value="08:00" />
+        </div>
+        <div class="field">
+          <label>AM Departure</label>
+          <input type="time" id="modalOutAM" value="12:00" />
+        </div>
+        <div class="field">
+          <label>PM Arrival</label>
+          <input type="time" id="modalInPM" value="13:00" />
+        </div>
+        <div class="field">
+          <label>PM Departure</label>
+          <input type="time" id="modalOutPM" value="17:00" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="cancelEmployeeBtn">Cancel</button>
+        <button class="btn" id="saveEmployeeBtn">Save Employee</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "dtr-index-html-v1";
+    let scanner = null;
+
+    function getCurrentMonth() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    }
+
+    function formatMonthLabel(month) {
+      const [year, m] = month.split("-").map(Number);
+      return new Date(year, m - 1, 1).toLocaleString("en-US", { month: "long", year: "numeric" });
+    }
+
+    function formatMonthUpper(month) {
+      return formatMonthLabel(month).toUpperCase();
+    }
+
+    function formatTime(date = new Date()) {
+      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+    }
+
+    function formatDateISO(date = new Date()) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function getDaysInMonth(month) {
+      const [year, m] = month.split("-").map(Number);
+      const lastDay = new Date(year, m, 0).getDate();
+      const days = [];
+      for (let i = 1; i <= lastDay; i++) {
+        const date = new Date(year, m - 1, i);
+        days.push({
+          day: i,
+          weekday: date.getDay(),
+          iso: `${month}-${String(i).padStart(2, "0")}`
+        });
+      }
+      return days;
+    }
+
+    function toMinutes(time) {
+      if (!time) return null;
+      const [h, m] = time.split(":").map(Number);
+      if (Number.isNaN(h) || Number.isNaN(m)) return null;
+      return h * 60 + m;
+    }
+
+    function minutesToHM(minutes) {
+      return {
+        hours: Math.floor(minutes / 60),
+        minutes: minutes % 60
+      };
+    }
+
+    function calcUndertime(record, employee) {
+      const expectedIn = toMinutes(employee.schedule.inAM || "08:00");
+      const expectedLunchOut = toMinutes(employee.schedule.outAM || "12:00");
+      const expectedLunchIn = toMinutes(employee.schedule.inPM || "13:00");
+      const expectedOut = toMinutes(employee.schedule.outPM || "17:00");
+
+      const actualIn = toMinutes(record.arrival);
+      const actualLunchOut = toMinutes(record.breakStart);
+      const actualLunchIn = toMinutes(record.breakEnd);
+      const actualOut = toMinutes(record.departure);
+
+      let undertime = 0;
+      if (actualIn && actualIn > expectedIn) undertime += actualIn - expectedIn;
+      if (actualLunchOut && actualLunchOut < expectedLunchOut) undertime += expectedLunchOut - actualLunchOut;
+      if (actualLunchIn && actualLunchIn > expectedLunchIn) undertime += actualLunchIn - expectedLunchIn;
+      if (actualOut && actualOut < expectedOut) undertime += expectedOut - actualOut;
+      return minutesToHM(undertime);
+    }
+
+    function downloadFile(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function defaultState() {
+      const base = `${location.origin}${location.pathname}`;
+      return {
+        month: getCurrentMonth(),
+        selectedEmployeeId: "emp-1",
+        sheetWebhookUrl: "",
+        qrBaseUrl: base,
+        employees: [
+          {
+            id: "emp-1",
+            code: "EMP001",
+            name: "Juan Dela Cruz",
+            position: "Staff",
+            department: "Operations",
+            schedule: {
+              inAM: "08:00",
+              outAM: "12:00",
+              inPM: "13:00",
+              outPM: "17:00"
+            }
+          }
+        ],
+        records: {},
+        logs: []
+      };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : defaultState();
+      } catch {
+        return defaultState();
+      }
+    }
+
+    let state = loadState();
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function selectedEmployee() {
+      return state.employees.find(e => e.id === state.selectedEmployeeId) || state.employees[0] || null;
+    }
+
+    function getRecordKey(employeeId, month) {
+      return `${employeeId}__${month}`;
+    }
+
+    function getRecord(employeeId, isoDate) {
+      const month = isoDate.slice(0, 7);
+      const key = getRecordKey(employeeId, month);
+      return (state.records[key] && state.records[key][isoDate]) || {
+        arrival: "",
+        breakStart: "",
+        breakEnd: "",
+        departure: ""
+      };
+    }
+
+    function setRecord(employeeId, isoDate, patch) {
+      const month = isoDate.slice(0, 7);
+      const key = getRecordKey(employeeId, month);
+      if (!state.records[key]) state.records[key] = {};
+      state.records[key][isoDate] = {
+        arrival: "",
+        breakStart: "",
+        breakEnd: "",
+        departure: "",
+        ...state.records[key][isoDate],
+        ...patch
+      };
+      saveState();
+    }
+
+    function buildRows(employee, month) {
+      return getDaysInMonth(month).map(d => {
+        const record = getRecord(employee.id, d.iso);
+        return {
+          ...d,
+          ...record,
+          weekendLabel: d.weekday === 6 ? "SAT" : d.weekday === 0 ? "SUN" : "",
+          undertime: calcUndertime(record, employee)
+        };
+      });
+    }
+
+    function showTab(tabId) {
+      document.querySelectorAll(".tab").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.tab === tabId);
+      });
+      document.querySelectorAll(".tab-panel").forEach(panel => {
+        panel.classList.toggle("active", panel.id === tabId);
+      });
+    }
+
+    function setStatus(id, message, show = true) {
+      const el = document.getElementById(id);
+      if (!message || !show) {
+        el.classList.add("hidden");
+        el.textContent = "";
+        return;
+      }
+      el.classList.remove("hidden");
+      el.textContent = message;
+    }
+
+    function renderEmployeeSelect() {
+      const select = document.getElementById("employeeSelect");
+      select.innerHTML = state.employees.map(emp => `<option value="${emp.id}">${emp.name}</option>`).join("");
+      select.value = state.selectedEmployeeId;
+    }
+
+    function renderSelectedEmployeeCard() {
+      const emp = selectedEmployee();
+      if (!emp) return;
+      document.getElementById("selectedCode").value = emp.code;
+      document.getElementById("selectedDepartment").value = emp.department;
+      document.getElementById("selectedPosition").value = emp.position;
+      document.getElementById("schedInAM").textContent = emp.schedule.inAM;
+      document.getElementById("schedOutAM").textContent = emp.schedule.outAM;
+      document.getElementById("schedInPM").textContent = emp.schedule.inPM;
+      document.getElementById("schedOutPM").textContent = emp.schedule.outPM;
+    }
+
+    function renderAttendanceTable() {
+      const emp = selectedEmployee();
+      if (!emp) return;
+      const rows = buildRows(emp, state.month);
+      const body = document.getElementById("attendanceBody");
+      body.innerHTML = rows.map(row => `
+        <tr>
+          <td>${row.day}</td>
+          <td><input type="time" value="${row.arrival || ""}" ${row.weekendLabel ? "disabled" : ""} data-iso="${row.iso}" data-field="arrival" /></td>
+          <td><input type="time" value="${row.breakStart || ""}" ${row.weekendLabel ? "disabled" : ""} data-iso="${row.iso}" data-field="breakStart" /></td>
+          <td><input type="time" value="${row.breakEnd || ""}" ${row.weekendLabel ? "disabled" : ""} data-iso="${row.iso}" data-field="breakEnd" /></td>
+          <td><input type="time" value="${row.departure || ""}" ${row.weekendLabel ? "disabled" : ""} data-iso="${row.iso}" data-field="departure" /></td>
+          <td class="weekday-badge">${row.weekendLabel || "—"}</td>
+          <td>${row.undertime.hours}h ${row.undertime.minutes}m</td>
+        </tr>
+      `).join("");
+
+      body.querySelectorAll("input[type='time']").forEach(input => {
+        input.addEventListener("change", (e) => {
+          const emp2 = selectedEmployee();
+          setRecord(emp2.id, e.target.dataset.iso, { [e.target.dataset.field]: e.target.value });
+          renderAll();
+        });
+      });
+    }
+
+    function renderSheet() {
+      const emp = selectedEmployee();
+      if (!emp) return;
+      const rows = buildRows(emp, state.month);
+      document.getElementById("sheetEmployeeName").textContent = emp.name;
+      document.getElementById("sheetMonthTitle").textContent = formatMonthUpper(state.month);
+      const body = document.getElementById("sheetBody");
+
+      let totalHours = 0;
+      let totalMinutes = 0;
+      body.innerHTML = rows.map(row => {
+        totalHours += row.undertime.hours;
+        totalMinutes += row.undertime.minutes;
+        return `
+          <tr>
+            <td>${row.day}</td>
+            <td>${row.weekendLabel ? "" : (row.arrival || "")}</td>
+            <td>${row.weekendLabel ? "" : (row.breakStart || "")}</td>
+            <td>${row.weekendLabel ? "" : (row.breakEnd || "")}</td>
+            <td>${row.weekendLabel ? "" : (row.departure || "")}</td>
+            <td>${row.weekendLabel ? "" : (row.undertime.hours || "")}</td>
+            <td class="red">${row.weekendLabel || (row.undertime.minutes || "")}</td>
+          </tr>
+        `;
+      }).join("");
+
+      totalHours += Math.floor(totalMinutes / 60);
+      totalMinutes = totalMinutes % 60;
+      body.innerHTML += `
+        <tr>
+          <td colspan="5" class="sheet-total">TOTAL</td>
+          <td>${totalHours || ""}</td>
+          <td>${totalMinutes || ""}</td>
+        </tr>
+      `;
+    }
+
+    function renderQR() {
+      const emp = selectedEmployee();
+      if (!emp) return;
+      const value = `${state.qrBaseUrl}?employee=${encodeURIComponent(emp.code)}&view=employee`;
+      document.getElementById("qrEmployeeName").textContent = emp.name;
+      document.getElementById("qrEmployeeCode").textContent = emp.code;
+      document.getElementById("qrValueText").textContent = value;
+      document.getElementById("kioskQrFormat").textContent = `${state.qrBaseUrl}?employee=EMP001&view=employee`;
+      const canvas = document.getElementById("employeeQrCanvas");
+      canvas.width = 220;
+      canvas.height = 220;
+      if (window.QRCode) {
+        QRCode.toCanvas(canvas, value, { width: 220, margin: 1 }, function () {});
+      }
+    }
+
+    function renderLogs() {
+      const list = document.getElementById("logList");
+      if (!state.logs.length) {
+        list.innerHTML = `<div class="log-item"><div class="muted">No scan logs yet.</div></div>`;
+        return;
+      }
+      list.innerHTML = state.logs.map(log => `
+        <div class="log-item">
+          <div>
+            <div><strong>${log.employeeName}</strong> • ${log.lastActionLabel}</div>
+            <div class="muted">${log.date} • ${log.time} • ${log.employeeCode}</div>
+          </div>
+          <div class="log-badge">${log.source}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderIntegration() {
+      document.getElementById("sheetWebhookUrl").value = state.sheetWebhookUrl || "";
+      document.getElementById("qrBaseUrl").value = state.qrBaseUrl || "";
+      const connected = !!state.sheetWebhookUrl;
+      const pill = document.getElementById("sheetConnectPill");
+      pill.textContent = connected ? "Google Sheets connected" : "Google Sheets not connected";
+      pill.classList.toggle("success", connected);
+
+      document.getElementById("appsScriptCode").value = `function doPost(e) {
+  var sheet = SpreadsheetApp.openById("YOUR_SHEET_ID").getSheetByName("DTR");
+  var data = JSON.parse(e.postData.contents);
+
+  var values = sheet.getDataRange().getValues();
+  var headers = values[0] || [];
+  if (headers.length === 0) {
+    sheet.appendRow([
+      "Date",
+      "Employee Code",
+      "Employee Name",
+      "Department",
+      "Position",
+      "Arrival",
+      "Break Start",
+      "Break End",
+      "Departure",
+      "Last Action",
+      "Timestamp",
+      "Source"
+    ]);
+    values = sheet.getDataRange().getValues();
+  }
+
+  var date = data.date;
+  var employeeCode = data.employeeCode;
+  var rowIndex = -1;
+
+  for (var i = 1; i < values.length; i++) {
+    if (values[i][0] == date && values[i][1] == employeeCode) {
+      rowIndex = i + 1;
+      break;
+    }
+  }
+
+  if (rowIndex === -1) {
+    sheet.appendRow([
+      data.date,
+      data.employeeCode,
+      data.employeeName,
+      data.department,
+      data.position,
+      data.arrival || "",
+      data.breakStart || "",
+      data.breakEnd || "",
+      data.departure || "",
+      data.lastAction || "",
+      data.timestamp || "",
+      data.source || "qr-kiosk"
+    ]);
+  } else {
+    sheet.getRange(rowIndex, 3).setValue(data.employeeName || "");
+    sheet.getRange(rowIndex, 4).setValue(data.department || "");
+    sheet.getRange(rowIndex, 5).setValue(data.position || "");
+    sheet.getRange(rowIndex, 6).setValue(data.arrival || "");
+    sheet.getRange(rowIndex, 7).setValue(data.breakStart || "");
+    sheet.getRange(rowIndex, 8).setValue(data.breakEnd || "");
+    sheet.getRange(rowIndex, 9).setValue(data.departure || "");
+    sheet.getRange(rowIndex, 10).setValue(data.lastAction || "");
+    sheet.getRange(rowIndex, 11).setValue(data.timestamp || "");
+    sheet.getRange(rowIndex, 12).setValue(data.source || "qr-kiosk");
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ ok: true }))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+    }
+
+    function renderKioskFromUrl() {
+      const params = new URLSearchParams(location.search);
+      const code = params.get("employee");
+      const view = params.get("view");
+      if (view === "employee") showTab("employeeTab");
+      if (code) {
+        document.getElementById("manualEmployeeCode").value = code.toUpperCase();
+        renderKioskEmployee(code.toUpperCase());
+      }
+    }
+
+    function renderKioskEmployee(code) {
+      const employee = state.employees.find(e => e.code.toUpperCase() === String(code).toUpperCase());
+      const card = document.getElementById("employeeCard");
+      const empty = document.getElementById("employeeEmpty");
+      if (!employee) {
+        card.style.display = "none";
+        empty.style.display = "block";
+        return null;
+      }
+      document.getElementById("kioskEmployeeName").textContent = employee.name;
+      document.getElementById("kioskEmployeeMeta").textContent = `${employee.code} • ${employee.department} • ${employee.position}`;
+      card.style.display = "block";
+      empty.style.display = "none";
+      return employee;
+    }
+
+    async function syncToGoogleSheets(payload) {
+      if (!state.sheetWebhookUrl) {
+        return { ok: false, message: "Saved locally. Add your Google Apps Script Web App URL to sync with Google Sheets." };
+      }
+      try {
+        const res = await fetch(state.sheetWebhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error("Webhook failed");
+        return { ok: true, message: "Saved locally and synced to Google Sheets." };
+      } catch (error) {
+        return { ok: false, message: "Saved locally, but Google Sheets sync failed. Check your Apps Script deployment and access settings." };
+      }
+    }
+
+    async function handleEmployeeAction(actionKey) {
+      const code = document.getElementById("manualEmployeeCode").value.trim().toUpperCase();
+      const employee = state.employees.find(e => e.code.toUpperCase() === code);
+      if (!employee) {
+        setStatus("kioskStatus", "Employee code not found.");
+        return;
+      }
+
+      const now = new Date();
+      const date = formatDateISO(now);
+      const time = formatTime(now);
+      const timestamp = now.toISOString();
+      const actionLabels = {
+        arrival: "Arrived",
+        breakStart: "Break Start",
+        breakEnd: "Break End",
+        departure: "Departure"
+      };
+
+      const current = getRecord(employee.id, date);
+      const updated = { ...current, [actionKey]: time };
+      setRecord(employee.id, date, updated);
+
+      const payload = {
+        date,
+        employeeCode: employee.code,
+        employeeName: employee.name,
+        department: employee.department,
+        position: employee.position,
+        arrival: updated.arrival || "",
+        breakStart: updated.breakStart || "",
+        breakEnd: updated.breakEnd || "",
+        departure: updated.departure || "",
+        lastAction: actionLabels[actionKey],
+        timestamp,
+        source: "qr-kiosk"
+      };
+
+      state.logs.unshift({
+        ...payload,
+        time,
+        lastActionLabel: actionLabels[actionKey]
+      });
+      state.logs = state.logs.slice(0, 100);
+      saveState();
+
+      const sync = await syncToGoogleSheets(payload);
+      setStatus("syncMessage", sync.message, true);
+      setStatus("kioskStatus", `${employee.name} • ${actionLabels[actionKey]} saved at ${time}. ${sync.message}`, true);
+
+      renderAll();
+
+      setTimeout(() => {
+        document.getElementById("manualEmployeeCode").value = "";
+        renderKioskEmployee("");
+        setStatus("kioskStatus", "Kiosk closed. Ready for next employee.", true);
+      }, 1200);
+    }
+
+    async function openScanner() {
+      document.getElementById("scannerWrap").classList.remove("hidden");
+      try {
+        scanner = new Html5Qrcode("reader");
+        await scanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: 220 },
+          async (decodedText) => {
+            try {
+              const parsed = new URL(decodedText);
+              const code = parsed.searchParams.get("employee") || decodedText;
+              document.getElementById("manualEmployeeCode").value = String(code).toUpperCase();
+            } catch {
+              document.getElementById("manualEmployeeCode").value = String(decodedText).toUpperCase();
+            }
+            renderKioskEmployee(document.getElementById("manualEmployeeCode").value);
+            setStatus("kioskStatus", "QR scanned successfully.", true);
+            await closeScanner();
+          }
+        );
+      } catch (e) {
+        setStatus("kioskStatus", "Camera scanner could not start. You can still enter the employee code manually.", true);
+      }
+    }
+
+    async function closeScanner() {
+      try {
+        if (scanner) {
+          await scanner.stop();
+          await scanner.clear();
+          scanner = null;
+        }
+      } catch {}
+      document.getElementById("scannerWrap").classList.add("hidden");
+      document.getElementById("reader").innerHTML = "";
+    }
+
+    function exportCsv() {
+      const emp = selectedEmployee();
+      if (!emp) return;
+      const rows = buildRows(emp, state.month);
+      const headers = [
+        "Employee Name","Employee Code","Department","Position","Date","Day","Arrival","Break Start","Break End","Departure","Undertime Hours","Undertime Minutes"
+      ];
+      const csvRows = rows.map(row => [
+        emp.name, emp.code, emp.department, emp.position, row.iso, row.day,
+        row.arrival, row.breakStart, row.breakEnd, row.departure, row.undertime.hours, row.undertime.minutes
+      ]);
+      const csv = [headers, ...csvRows]
+        .map(r => r.map(cell => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(","))
+        .join("\n");
+      downloadFile(`${emp.name.replace(/\s+/g, "_")}_${state.month}_DTR.csv`, csv, "text/csv;charset=utf-8");
+    }
+
+    function exportJson() {
+      const emp = selectedEmployee();
+      if (!emp) return;
+      const rows = buildRows(emp, state.month);
+      const payload = {
+        employee: emp,
+        month: state.month,
+        records: rows,
+        logs: state.logs.filter(log => log.employeeCode === emp.code)
+      };
+      downloadFile(`${emp.name.replace(/\s+/g, "_")}_${state.month}_DTR.json`, JSON.stringify(payload, null, 2), "application/json");
+    }
+
+    function openEmployeeModal() {
+      document.getElementById("employeeModal").classList.add("open");
+    }
+
+    function closeEmployeeModal() {
+      document.getElementById("employeeModal").classList.remove("open");
+    }
+
+    function resetEmployeeModal() {
+      document.getElementById("modalCode").value = "";
+      document.getElementById("modalName").value = "";
+      document.getElementById("modalPosition").value = "";
+      document.getElementById("modalDepartment").value = "";
+      document.getElementById("modalInAM").value = "08:00";
+      document.getElementById("modalOutAM").value = "12:00";
+      document.getElementById("modalInPM").value = "13:00";
+      document.getElementById("modalOutPM").value = "17:00";
+    }
+
+    function saveEmployeeFromModal() {
+      const code = document.getElementById("modalCode").value.trim().toUpperCase();
+      const name = document.getElementById("modalName").value.trim();
+      if (!code || !name) {
+        alert("Employee code and name are required.");
+        return;
+      }
+      if (state.employees.some(e => e.code.toUpperCase() === code)) {
+        alert("Employee code already exists.");
+        return;
+      }
+      const employee = {
+        id: `emp-${Date.now()}`,
+        code,
+        name,
+        position: document.getElementById("modalPosition").value.trim(),
+        department: document.getElementById("modalDepartment").value.trim(),
+        schedule: {
+          inAM: document.getElementById("modalInAM").value || "08:00",
+          outAM: document.getElementById("modalOutAM").value || "12:00",
+          inPM: document.getElementById("modalInPM").value || "13:00",
+          outPM: document.getElementById("modalOutPM").value || "17:00"
+        }
+      };
+      state.employees.push(employee);
+      state.selectedEmployeeId = employee.id;
+      saveState();
+      resetEmployeeModal();
+      closeEmployeeModal();
+      renderAll();
+    }
+
+    function deleteSelectedEmployee() {
+      const emp = selectedEmployee();
+      if (!emp || state.employees.length <= 1) return;
+      const ok = confirm(`Delete ${emp.name}?`);
+      if (!ok) return;
+      state.employees = state.employees.filter(e => e.id !== emp.id);
+      state.selectedEmployeeId = state.employees[0]?.id || "";
+      saveState();
+      renderAll();
+    }
+
+    function attachEvents() {
+      document.querySelectorAll(".tab").forEach(btn => {
+        btn.addEventListener("click", () => showTab(btn.dataset.tab));
+      });
+
+      document.getElementById("employeeSelect").addEventListener("change", (e) => {
+        state.selectedEmployeeId = e.target.value;
+        saveState();
+        renderAll();
+      });
+
+      document.getElementById("monthInput").addEventListener("change", (e) => {
+        state.month = e.target.value;
+        saveState();
+        renderAll();
+      });
+
+      document.getElementById("sheetWebhookUrl").addEventListener("input", (e) => {
+        state.sheetWebhookUrl = e.target.value.trim();
+        saveState();
+        renderIntegration();
+      });
+
+      document.getElementById("qrBaseUrl").addEventListener("input", (e) => {
+        state.qrBaseUrl = e.target.value.trim() || `${location.origin}${location.pathname}`;
+        saveState();
+        renderQR();
+      });
+
+      document.getElementById("manualEmployeeCode").addEventListener("input", (e) => {
+        renderKioskEmployee(e.target.value.trim().toUpperCase());
+      });
+
+      document.getElementById("openScannerBtn").addEventListener("click", openScanner);
+      document.getElementById("closeScannerBtn").addEventListener("click", closeScanner);
+      document.querySelectorAll(".action-btn").forEach(btn => {
+        btn.addEventListener("click", () => handleEmployeeAction(btn.dataset.action));
+      });
+
+      document.getElementById("exportCsvBtn").addEventListener("click", exportCsv);
+      document.getElementById("exportJsonBtn").addEventListener("click", exportJson);
+      document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+      document.getElementById("openAddEmployeeBtn").addEventListener("click", openEmployeeModal);
+      document.getElementById("cancelEmployeeBtn").addEventListener("click", closeEmployeeModal);
+      document.getElementById("saveEmployeeBtn").addEventListener("click", saveEmployeeFromModal);
+      document.getElementById("deleteEmployeeBtn").addEventListener("click", deleteSelectedEmployee);
+      document.getElementById("employeeModal").addEventListener("click", (e) => {
+        if (e.target.id === "employeeModal") closeEmployeeModal();
+      });
+    }
+
+    function renderAll() {
+      const emp = selectedEmployee();
+      if (!emp) return;
+      document.getElementById("monthInput").value = state.month;
+      renderEmployeeSelect();
+      renderSelectedEmployeeCard();
+      renderAttendanceTable();
+      renderSheet();
+      renderQR();
+      renderLogs();
+      renderIntegration();
+      renderKioskEmployee(document.getElementById("manualEmployeeCode").value.trim().toUpperCase());
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      attachEvents();
+      renderAll();
+      renderKioskFromUrl();
+    });
+  </script>
+</body>
+</html>
