@@ -339,8 +339,91 @@
       margin-top: 16px;
     }
 
-    @media (max-width: 1024px) {
-      .grid-2, .grid-3, .grid-5, .steps { grid-template-columns: 1fr; }
+    /* Shift schedule selector */
+    .shift-toggle {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .shift-toggle-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 14px;
+      border: 2px solid var(--border);
+      background: var(--soft);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .shift-toggle-btn.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: white;
+    }
+    .shift-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+    .shift-dot.hollow {
+      background: transparent;
+      border: 2px solid currentColor;
+    }
+    .day-schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .day-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .day-col .day-label {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text);
+    }
+    .day-check {
+      width: 32px; height: 32px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: var(--soft);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .day-check.checked {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: white;
+    }
+    .day-hours-select {
+      width: 100%;
+      font-size: 11px;
+      padding: 3px 2px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--soft);
+      text-align: center;
+      cursor: pointer;
+    }
+    .day-hours-select:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .modal-card { max-height: 90vh; overflow-y: auto; }
+
       .mini-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .sheet-meta { grid-template-columns: 1fr; }
       .sheet-title { font-size: 30px; }
@@ -421,12 +504,11 @@
 
           <div style="margin-top:16px;">
             <label>Official Schedule</label>
-            <div class="mini-cards">
-              <div class="mini-card"><div class="k">AM In</div><div class="v" id="schedInAM"></div></div>
-              <div class="mini-card"><div class="k">AM Out</div><div class="v" id="schedOutAM"></div></div>
-              <div class="mini-card"><div class="k">PM In</div><div class="v" id="schedInPM"></div></div>
-              <div class="mini-card"><div class="k">PM Out</div><div class="v" id="schedOutPM"></div></div>
+            <div class="mini-cards" style="margin-top:8px;">
+              <div class="mini-card"><div class="k">Shift</div><div class="v" id="schedShift">—</div></div>
+              <div class="mini-card"><div class="k">Work Days</div><div class="v" id="schedDays" style="font-size:12px;">—</div></div>
             </div>
+            <div id="schedDayDetail" style="margin-top:8px; font-size:12px; color:var(--muted); line-height:1.8;"></div>
           </div>
         </div>
 
@@ -575,7 +657,8 @@
   <div class="modal" id="employeeModal">
     <div class="modal-card">
       <h3>Add Employee</h3>
-      <p class="desc">Create an employee for admin view and QR kiosk access.</p>
+      <p class="desc" style="margin-bottom:16px;">Create an employee and configure their shift schedule.</p>
+
       <div class="form-grid">
         <div class="field">
           <label>Employee Code</label>
@@ -593,23 +676,30 @@
           <label>Department</label>
           <input id="modalDepartment" placeholder="Department" />
         </div>
-        <div class="field">
-          <label>AM Arrival</label>
-          <input type="time" id="modalInAM" value="08:00" />
-        </div>
-        <div class="field">
-          <label>AM Departure</label>
-          <input type="time" id="modalOutAM" value="12:00" />
-        </div>
-        <div class="field">
-          <label>PM Arrival</label>
-          <input type="time" id="modalInPM" value="13:00" />
-        </div>
-        <div class="field">
-          <label>PM Departure</label>
-          <input type="time" id="modalOutPM" value="17:00" />
+      </div>
+
+      <!-- Shift Type Toggle -->
+      <div style="margin-top:18px;">
+        <label style="font-weight:600; font-size:14px;">Shift Type</label>
+        <div class="shift-toggle" style="margin-top:8px;">
+          <button type="button" class="shift-toggle-btn active" id="btnMorning" onclick="selectShift('morning')">
+            <span class="shift-dot"></span> Morning Shift
+          </button>
+          <button type="button" class="shift-toggle-btn" id="btnAfternoon" onclick="selectShift('afternoon')">
+            <span class="shift-dot hollow"></span> Afternoon Shift
+          </button>
         </div>
       </div>
+
+      <!-- Day Schedule -->
+      <div style="margin-top:16px;">
+        <label style="font-weight:600; font-size:14px;">Work Days &amp; Hours</label>
+        <p style="font-size:12px; color:var(--muted); margin:4px 0 10px;">Check each working day, then choose 8hrs or 12hrs duty.</p>
+        <div class="day-schedule-grid" id="dayScheduleGrid">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
       <div class="modal-actions">
         <button class="btn secondary" id="cancelEmployeeBtn">Cancel</button>
         <button class="btn" id="saveEmployeeBtn">Save Employee</button>
@@ -621,7 +711,7 @@
     const STORAGE_KEY = "dtr-index-html-v1";
 
     // ── Paste your Google Apps Script Web App URL here ──────────────────────
-    const GOOGLE_SHEET_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+    const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec";
     // ────────────────────────────────────────────────────────────────────────
     let scanner = null;
 
@@ -679,11 +769,29 @@
       };
     }
 
-    function calcUndertime(record, employee) {
-      const expectedIn = toMinutes(employee.schedule.inAM || "08:00");
-      const expectedLunchOut = toMinutes(employee.schedule.outAM || "12:00");
-      const expectedLunchIn = toMinutes(employee.schedule.inPM || "13:00");
-      const expectedOut = toMinutes(employee.schedule.outPM || "17:00");
+    function getShiftTimes(employee, date) {
+      // Returns { inAM, outAM, inPM, outPM } based on shift and hours for the day
+      const dayMap = { 0: "Su", 1: "M", 2: "T", 3: "W", 4: "TH", 5: "F", 6: "Sa" };
+      const d = new Date(date + "T00:00:00");
+      const dayKey = dayMap[d.getDay()];
+      const daySched = employee.schedule?.[dayKey];
+      const hours = daySched?.hours || 8;
+      const shift = employee.shift || "morning";
+      if (shift === "morning") {
+        if (hours === 12) return { inAM: "07:00", outAM: "12:00", inPM: "13:00", outPM: "19:00" };
+        return { inAM: "07:00", outAM: "11:00", inPM: "12:00", outPM: "16:00" };
+      } else {
+        if (hours === 12) return { inAM: "19:00", outAM: "23:00", inPM: "00:00", outPM: "07:00" };
+        return { inAM: "19:00", outAM: "23:00", inPM: "00:00", outPM: "04:00" };
+      }
+    }
+
+    function calcUndertime(record, employee, date) {
+      const times = getShiftTimes(employee, date || formatDateISO());
+      const expectedIn = toMinutes(times.inAM);
+      const expectedLunchOut = toMinutes(times.outAM);
+      const expectedLunchIn = toMinutes(times.inPM);
+      const expectedOut = toMinutes(times.outPM);
 
       const actualIn = toMinutes(record.arrival);
       const actualLunchOut = toMinutes(record.breakStart);
@@ -721,11 +829,15 @@
             name: "Juan Dela Cruz",
             position: "Staff",
             department: "Operations",
+            shift: "morning",
             schedule: {
-              inAM: "08:00",
-              outAM: "12:00",
-              inPM: "13:00",
-              outPM: "17:00"
+              M: { active: true, hours: 8 },
+              T: { active: true, hours: 8 },
+              W: { active: true, hours: 8 },
+              TH: { active: true, hours: 8 },
+              F: { active: true, hours: 8 },
+              Sa: { active: false, hours: 8 },
+              Su: { active: false, hours: 8 }
             }
           }
         ],
@@ -790,7 +902,7 @@
           ...d,
           ...record,
           weekendLabel: d.weekday === 6 ? "SAT" : d.weekday === 0 ? "SUN" : "",
-          undertime: calcUndertime(record, employee)
+          undertime: calcUndertime(record, employee, d.iso)
         };
       });
     }
@@ -827,10 +939,13 @@
       document.getElementById("selectedCode").value = emp.code;
       document.getElementById("selectedDepartment").value = emp.department;
       document.getElementById("selectedPosition").value = emp.position;
-      document.getElementById("schedInAM").textContent = emp.schedule.inAM;
-      document.getElementById("schedOutAM").textContent = emp.schedule.outAM;
-      document.getElementById("schedInPM").textContent = emp.schedule.inPM;
-      document.getElementById("schedOutPM").textContent = emp.schedule.outPM;
+      const shiftLabel = emp.shift === "afternoon" ? "Afternoon Shift" : "Morning Shift";
+      document.getElementById("schedShift").textContent = shiftLabel;
+      const days = ["M","T","W","TH","F","Sa","Su"];
+      const activeDays = days.filter(d => emp.schedule?.[d]?.active);
+      document.getElementById("schedDays").textContent = activeDays.join(", ") || "None";
+      const detail = activeDays.map(d => `${d}: ${emp.schedule[d].hours}hrs`).join(" · ");
+      document.getElementById("schedDayDetail").textContent = detail;
     }
 
     function renderAttendanceTable() {
@@ -931,7 +1046,7 @@
 
 
     async function syncToGoogleSheets(payload) {
-      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec") {
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
         return { ok: false, message: "Google Sheets URL not configured." };
       }
       try {
@@ -1104,6 +1219,7 @@
     }
 
     function openEmployeeModal() {
+      resetEmployeeModal();
       document.getElementById("employeeModal").classList.add("open");
     }
 
@@ -1111,15 +1227,70 @@
       document.getElementById("employeeModal").classList.remove("open");
     }
 
+    const DAYS = ["M","T","W","TH","F","Sa","Su"];
+    const DAY_LABELS = { M:"M", T:"T", W:"W", TH:"TH", F:"F", Sa:"Sa", Su:"Su" };
+
+    let modalShift = "morning";
+    let modalDaySchedule = {
+      M:  { active: true,  hours: 8 },
+      T:  { active: true,  hours: 8 },
+      W:  { active: true,  hours: 8 },
+      TH: { active: true,  hours: 8 },
+      F:  { active: true,  hours: 8 },
+      Sa: { active: false, hours: 8 },
+      Su: { active: false, hours: 8 }
+    };
+
+    function selectShift(shift) {
+      modalShift = shift;
+      document.getElementById("btnMorning").classList.toggle("active", shift === "morning");
+      document.getElementById("btnAfternoon").classList.toggle("active", shift === "afternoon");
+    }
+
+    function renderDayScheduleGrid() {
+      const grid = document.getElementById("dayScheduleGrid");
+      grid.innerHTML = DAYS.map(day => {
+        const d = modalDaySchedule[day];
+        return `
+          <div class="day-col">
+            <div class="day-label">${DAY_LABELS[day]}</div>
+            <div class="day-check ${d.active ? "checked" : ""}" onclick="toggleDay('${day}')" title="${day}">
+              ${d.active ? "✓" : ""}
+            </div>
+            <select class="day-hours-select" id="hoursSelect_${day}" ${!d.active ? "disabled" : ""} onchange="setDayHours('${day}', this.value)">
+              <option value="8" ${d.hours === 8 ? "selected" : ""}>8 hrs</option>
+              <option value="12" ${d.hours === 12 ? "selected" : ""}>12 hrs</option>
+            </select>
+          </div>`;
+      }).join("");
+    }
+
+    function toggleDay(day) {
+      modalDaySchedule[day].active = !modalDaySchedule[day].active;
+      renderDayScheduleGrid();
+    }
+
+    function setDayHours(day, val) {
+      modalDaySchedule[day].hours = parseInt(val);
+    }
+
     function resetEmployeeModal() {
       document.getElementById("modalCode").value = "";
       document.getElementById("modalName").value = "";
       document.getElementById("modalPosition").value = "";
       document.getElementById("modalDepartment").value = "";
-      document.getElementById("modalInAM").value = "08:00";
-      document.getElementById("modalOutAM").value = "12:00";
-      document.getElementById("modalInPM").value = "13:00";
-      document.getElementById("modalOutPM").value = "17:00";
+      modalShift = "morning";
+      modalDaySchedule = {
+        M:  { active: true,  hours: 8 },
+        T:  { active: true,  hours: 8 },
+        W:  { active: true,  hours: 8 },
+        TH: { active: true,  hours: 8 },
+        F:  { active: true,  hours: 8 },
+        Sa: { active: false, hours: 8 },
+        Su: { active: false, hours: 8 }
+      };
+      selectShift("morning");
+      renderDayScheduleGrid();
     }
 
     function saveEmployeeFromModal() {
@@ -1133,18 +1304,19 @@
         alert("Employee code already exists.");
         return;
       }
+      // Read hours selects (in case user changed without blur)
+      DAYS.forEach(day => {
+        const sel = document.getElementById(`hoursSelect_${day}`);
+        if (sel) modalDaySchedule[day].hours = parseInt(sel.value);
+      });
       const employee = {
         id: `emp-${Date.now()}`,
         code,
         name,
         position: document.getElementById("modalPosition").value.trim(),
         department: document.getElementById("modalDepartment").value.trim(),
-        schedule: {
-          inAM: document.getElementById("modalInAM").value || "08:00",
-          outAM: document.getElementById("modalOutAM").value || "12:00",
-          inPM: document.getElementById("modalInPM").value || "13:00",
-          outPM: document.getElementById("modalOutPM").value || "17:00"
-        }
+        shift: modalShift,
+        schedule: JSON.parse(JSON.stringify(modalDaySchedule))
       };
       state.employees.push(employee);
       state.selectedEmployeeId = employee.id;
