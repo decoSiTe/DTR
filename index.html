@@ -371,7 +371,7 @@
     <div class="topbar no-print">
       <div>
         <h1>Daily Time Record System</h1>
-        <p class="subtitle">Single-file index.html for GitHub Pages. Employees scan QR and tap an action to record their time.</p>
+        <p class="subtitle">Single-file index.html for GitHub Pages. Employees scan QR, tap an action, and data saves to Google Sheets.</p>
       </div>
       <div class="actions">
         <button class="btn" id="openAddEmployeeBtn">Add Employee</button>
@@ -472,6 +472,8 @@
           <div id="syncMessage" class="status hidden"></div>
           <div class="log-list" id="logList"></div>
         </div>
+
+
       </div>
 
       <div id="printSheet" class="sheet">
@@ -521,7 +523,7 @@
       <div class="grid grid-2">
         <div class="card">
           <h3>Employee QR Kiosk</h3>
-          <p class="desc">Employee scans QR, taps Arrived, Break Start, Break End, or Departure. The app records the real time.</p>
+          <p class="desc">Employee scans QR, taps Arrived, Break Start, Break End, or Departure. The app records the real time and saves to Google Sheets.</p>
 
           <div>
             <span class="pill">Realtime timestamp</span>
@@ -565,6 +567,7 @@
         </div>
       </div>
     </section>
+
 
 
   </div>
@@ -616,9 +619,13 @@
 
   <script>
     const STORAGE_KEY = "dtr-index-html-v1";
+
+    // ── Paste your Google Apps Script Web App URL here ──────────────────────
+    const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec";
+    // ────────────────────────────────────────────────────────────────────────
     let scanner = null;
 
-    function getCurrentMonth() {
+    function getCurrentMonth() 
       const d = new Date();
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     }
@@ -706,7 +713,6 @@
       return {
         month: getCurrentMonth(),
         selectedEmployeeId: "emp-1",
-        sheetWebhookUrl: "",
         qrBaseUrl: base,
         employees: [
           {
@@ -925,6 +931,23 @@
 
 
     function renderKioskFromUrl() {
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
+        return { ok: false, message: "Google Sheets URL not configured." };
+      }
+      try {
+        await fetch(GOOGLE_SHEET_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+        return { ok: true, message: "✓ Synced to Google Sheets." };
+      } catch (error) {
+        return { ok: false, message: "Saved locally, but Google Sheets sync failed." };
+      }
+    }
+
+    function renderKioskFromUrl() {
       const params = new URLSearchParams(location.search);
       const code = params.get("employee");
       const view = params.get("view");
@@ -998,6 +1021,11 @@
       saveState();
 
       setStatus("kioskStatus", `${employee.name} • ${actionLabels[actionKey]} saved at ${time}.`, true);
+
+      syncToGoogleSheets(payload).then(sync => {
+        setStatus("syncMessage", sync.message, true);
+        setStatus("kioskStatus", `${employee.name} • ${actionLabels[actionKey]} saved at ${time}. ${sync.message}`, true);
+      });
 
       renderAll();
 
