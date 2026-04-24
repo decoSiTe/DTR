@@ -725,7 +725,7 @@
     const STORAGE_KEY = "dtr-index-html-v1";
 
     // ── Paste your Google Apps Script Web App URL here ──────────────────────
-    const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec";
+    const GOOGLE_SHEET_URL = "YOUR_APPS_SCRIPT_URL_HERE";
     // ────────────────────────────────────────────────────────────────────────
     let scanner = null;
 
@@ -1081,7 +1081,7 @@
 
 
     async function syncToGoogleSheets(payload) {
-      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec") {
         return { ok: false, message: "Google Sheets URL not configured." };
       }
       try {
@@ -1156,6 +1156,7 @@
       const updated = { ...current, [actionKey]: time };
       setRecord(employee.id, date, updated);
 
+      // Only send the ONE field that was tapped — never send empty fields
       const payload = {
         type: "attendance",
         date,
@@ -1163,14 +1164,14 @@
         employeeName: employee.name,
         department: employee.department,
         position: employee.position,
-        arrival: updated.arrival || "",
-        breakStart: updated.breakStart || "",
-        breakEnd: updated.breakEnd || "",
-        departure: updated.departure || "",
         lastAction: actionLabels[actionKey],
         timestamp,
         source: "qr-kiosk"
       };
+      if (actionKey === "arrival")    payload.arrival    = time;
+      if (actionKey === "breakStart") payload.breakStart = time;
+      if (actionKey === "breakEnd")   payload.breakEnd   = time;
+      if (actionKey === "departure")  payload.departure  = time;
 
       state.logs.unshift({
         ...payload,
