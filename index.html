@@ -725,7 +725,7 @@
     const STORAGE_KEY = "dtr-index-html-v1";
 
     // ── Paste your Google Apps Script Web App URL here ──────────────────────
-    const GOOGLE_SHEET_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+    const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec";
     // ────────────────────────────────────────────────────────────────────────
     let scanner = null;
 
@@ -1081,7 +1081,7 @@
 
 
     async function syncToGoogleSheets(payload) {
-      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec") {
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
         return { ok: false, message: "Google Sheets URL not configured." };
       }
       try {
@@ -1376,7 +1376,10 @@
         department: employee.department,
         position: employee.position,
         shift: employee.shift,
-        schedule: JSON.stringify(employee.schedule)
+        schedule: Object.entries(employee.schedule)
+          .filter(([, v]) => v.active)
+          .map(([day, v]) => `${day}:${v.hours}hrs`)
+          .join(", ")
       });
 
       resetEmployeeModal();
