@@ -1028,17 +1028,17 @@
     function renderQR() {
       const emp = selectedEmployee();
       if (!emp) return;
-      // QR points directly to the kiosk page — employee types/scans their code there
-      const base = `${location.origin}${location.pathname}`;
-      const value = `${base}?view=employee`;
+      // QR points to kiosk.html in the same folder
+      const base = `${location.origin}${location.pathname.replace(/index\.html$/, "")}`;
+      const kioskUrl = `${base}kiosk.html`;
       if (document.getElementById("qrEmployeeName"))
         document.getElementById("qrEmployeeName").textContent = emp.name;
       if (document.getElementById("qrEmployeeCode"))
         document.getElementById("qrEmployeeCode").textContent = emp.code;
       if (document.getElementById("qrValueText"))
-        document.getElementById("qrValueText").textContent = value;
+        document.getElementById("qrValueText").textContent = kioskUrl;
       if (document.getElementById("kioskQrFormat"))
-        document.getElementById("kioskQrFormat").textContent = `${base}?view=employee`;
+        document.getElementById("kioskQrFormat").textContent = kioskUrl;
 
       const wrap = document.getElementById("qrImageWrap");
       if (!wrap) return;
@@ -1046,7 +1046,7 @@
 
       function drawQR() {
         if (window.QRCode) {
-          QRCode.toDataURL(value, { width: 220, margin: 1, color: { dark: "#000", light: "#fff" } }, function(err, url) {
+          QRCode.toDataURL(kioskUrl, { width: 220, margin: 1, color: { dark: "#000", light: "#fff" } }, function(err, url) {
             if (!err) {
               const img = document.createElement("img");
               img.src = url;
@@ -1157,6 +1157,7 @@
       setRecord(employee.id, date, updated);
 
       const payload = {
+        type: "attendance",
         date,
         employeeCode: employee.code,
         employeeName: employee.name,
@@ -1365,6 +1366,18 @@
       state.employees.push(employee);
       state.selectedEmployeeId = employee.id;
       saveState();
+
+      // Sync new employee to Google Sheets Employees tab
+      syncToGoogleSheets({
+        type: "employee",
+        employeeCode: employee.code,
+        employeeName: employee.name,
+        department: employee.department,
+        position: employee.position,
+        shift: employee.shift,
+        schedule: JSON.stringify(employee.schedule)
+      });
+
       resetEmployeeModal();
       closeEmployeeModal();
       renderAll();
