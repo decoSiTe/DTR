@@ -4,8 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DTR QR System</title>
-  <script src="https://unpkg.com/html5-qrcode" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <style>
     :root {
       --bg: #f8fafc;
@@ -433,18 +432,33 @@
     }
 
     @media print {
+      @page {
+        size: A6 landscape;
+        margin: 6mm;
+      }
       body * { visibility: hidden; }
       #printSheet, #printSheet * { visibility: visible; }
       #printSheet {
         position: absolute;
         left: 0;
         top: 0;
-        width: 100%;
+        width: 148mm;
         box-shadow: none;
         border: none;
         border-radius: 0;
         margin: 0;
+        font-size: 7px !important;
       }
+      #printSheet .sheet-title { font-size: 14px !important; }
+      #printSheet .sheet-name { font-size: 10px !important; }
+      #printSheet .sheet-name-note { font-size: 6px !important; }
+      #printSheet .sheet-meta-left { font-size: 7px !important; }
+      #printSheet .sheet-meta-right-title { font-size: 10px !important; }
+      #printSheet .sheet-meta-right-sub { font-size: 6px !important; }
+      #printSheet table { font-size: 6.5px !important; }
+      #printSheet th, #printSheet td { padding: 2px 3px !important; }
+      #printSheet .sheet-total { font-size: 8px !important; }
+      #printSheet .sheet-top-small { font-size: 6px !important; }
       .no-print { display: none !important; }
     }
   </style>
@@ -539,7 +553,7 @@
           <h3>Employee QR</h3>
           <p class="desc">Print or share this QR. It opens the employee kiosk page for the selected employee.</p>
           <div class="qr-box">
-            <div class="qr-canvas-wrap"><canvas id="employeeQrCanvas"></canvas></div>
+            <div id="qrImageWrap" style="min-height:220px; display:flex; align-items:center; justify-content:center; background:#f8f8f8; border-radius:8px;"></div>
           </div>
           <div style="margin-top:14px; font-size:14px; line-height:1.6;">
             <div><span class="muted">Employee:</span> <strong id="qrEmployeeName"></strong></div>
@@ -1014,17 +1028,38 @@
     function renderQR() {
       const emp = selectedEmployee();
       if (!emp) return;
-      const value = `${state.qrBaseUrl}?employee=${encodeURIComponent(emp.code)}&view=employee`;
-      document.getElementById("qrEmployeeName").textContent = emp.name;
-      document.getElementById("qrEmployeeCode").textContent = emp.code;
-      document.getElementById("qrValueText").textContent = value;
-      document.getElementById("kioskQrFormat").textContent = `${state.qrBaseUrl}?employee=EMP001&view=employee`;
-      const canvas = document.getElementById("employeeQrCanvas");
-      canvas.width = 220;
-      canvas.height = 220;
-      if (window.QRCode) {
-        QRCode.toCanvas(canvas, value, { width: 220, margin: 1 }, function () {});
+      // QR points directly to the kiosk page — employee types/scans their code there
+      const base = `${location.origin}${location.pathname}`;
+      const value = `${base}?view=employee`;
+      if (document.getElementById("qrEmployeeName"))
+        document.getElementById("qrEmployeeName").textContent = emp.name;
+      if (document.getElementById("qrEmployeeCode"))
+        document.getElementById("qrEmployeeCode").textContent = emp.code;
+      if (document.getElementById("qrValueText"))
+        document.getElementById("qrValueText").textContent = value;
+      if (document.getElementById("kioskQrFormat"))
+        document.getElementById("kioskQrFormat").textContent = `${base}?view=employee`;
+
+      const wrap = document.getElementById("qrImageWrap");
+      if (!wrap) return;
+      wrap.innerHTML = "";
+
+      function drawQR() {
+        if (window.QRCode) {
+          QRCode.toDataURL(value, { width: 220, margin: 1, color: { dark: "#000", light: "#fff" } }, function(err, url) {
+            if (!err) {
+              const img = document.createElement("img");
+              img.src = url;
+              img.style.cssText = "width:220px;height:220px;display:block;";
+              wrap.innerHTML = "";
+              wrap.appendChild(img);
+            }
+          });
+        } else {
+          setTimeout(drawQR, 200);
+        }
       }
+      drawQR();
     }
 
     function renderLogs() {
@@ -1050,6 +1085,8 @@
         return { ok: false, message: "Google Sheets URL not configured." };
       }
       try {
+        // Use no-cors since Apps Script doesn't return CORS headers in all cases
+        // Data still reaches the sheet even though we can't read the response
         await fetch(GOOGLE_SHEET_URL, {
           method: "POST",
           mode: "no-cors",
@@ -1058,7 +1095,14 @@
         });
         return { ok: true, message: "✓ Synced to Google Sheets." };
       } catch (error) {
-        return { ok: false, message: "Saved locally, but Google Sheets sync failed." };
+        // Fallback: try GET with data as URL param (some Apps Script deployments work better)
+        try {
+          const params = new URLSearchParams({ data: JSON.stringify(payload) });
+          await fetch(`${GOOGLE_SHEET_URL}?${params}`, { method: "GET", mode: "no-cors" });
+          return { ok: true, message: "✓ Synced to Google Sheets." };
+        } catch (e) {
+          return { ok: false, message: "⚠ Saved locally. Sheets sync failed — check your Apps Script URL." };
+        }
       }
     }
 
