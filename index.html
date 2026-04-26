@@ -422,6 +422,14 @@
       cursor: not-allowed;
     }
     .modal-card { max-height: 90vh; overflow-y: auto; }
+    #reportTable th, #reportTable td {
+      border: 1px solid var(--border); padding: 7px 10px; text-align: center; white-space: nowrap;
+    }
+    #reportTable th { background: var(--soft); font-weight: 700; font-size: 12px; }
+    #reportTable td:first-child, #reportTable td:nth-child(2),
+    #reportTable td:nth-child(3), #reportTable td:nth-child(4) { text-align: left; }
+    #reportTable tr:nth-child(even) td { background: #fafbfc; }
+    #reportTable .total-col { font-weight: 700; color: var(--primary); }
 
       .mini-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .sheet-meta { grid-template-columns: 1fr; }
@@ -572,7 +580,29 @@
 
       </div>
 
-      <div id="printSheet" class="sheet">
+      <!-- Date Range Report -->
+      <div class="card no-print" style="margin-top:20px;">
+        <h3>Attendance Report</h3>
+        <p class="desc">Pick a date range to see all employee hours per day.</p>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-top:12px;">
+          <div class="field" style="margin:0;">
+            <label>From Date</label>
+            <input type="date" id="reportFrom" />
+          </div>
+          <div class="field" style="margin:0;">
+            <label>To Date</label>
+            <input type="date" id="reportTo" />
+          </div>
+          <button class="btn" id="runReportBtn">Generate Report</button>
+        </div>
+        <div id="reportStatus" style="margin-top:10px; font-size:13px; color:var(--muted);"></div>
+        <div style="overflow-x:auto; margin-top:14px;">
+          <table id="reportTable" style="display:none; width:100%; border-collapse:collapse; font-size:13px;">
+            <thead id="reportHead"></thead>
+            <tbody id="reportBody"></tbody>
+          </table>
+        </div>
+      </div>
         <div class="sheet-top-small">Civil Service Form No. 48</div>
         <div class="sheet-title">DAILY TIME RECORD</div>
         <div class="sheet-name" id="sheetEmployeeName"></div>
@@ -725,7 +755,7 @@
     const STORAGE_KEY = "dtr-index-html-v1";
 
     // ── Paste your Google Apps Script Web App URL here ──────────────────────
-    const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec";
+    const GOOGLE_SHEET_URL = "YOUR_APPS_SCRIPT_URL_HERE";
     // ────────────────────────────────────────────────────────────────────────
     let scanner = null;
 
@@ -1436,6 +1466,128 @@
       document.getElementById("employeeModal").addEventListener("click", (e) => {
         if (e.target.id === "employeeModal") closeEmployeeModal();
       });
+
+      document.getElementById("runReportBtn").addEventListener("click", generateReport);
+    }
+
+    // ── Load employees from Google Sheets on startup ───────────────────────
+    async function loadEmployeesFromSheet() {
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") return;
+      try {
+        const res = await fetch(`${GOOGLE_SHEET_URL}?action=getEmployees`, { cache: "no-cache" });
+        const data = await res.json();
+        if (!data.employees || data.employees.length === 0) return;
+        // Merge sheet employees into state — add new ones, skip existing
+        let changed = false;
+        data.employees.forEach(emp => {
+          const exists = state.employees.find(e => e.code.toUpperCase() === emp.code.toUpperCase());
+          if (!exists) {
+            state.employees.push({
+              id: `emp-${emp.code}`,
+              code: emp.code,
+              name: emp.name,
+              position: emp.position,
+              department: emp.department,
+              shift: emp.shift || "morning",
+              schedule: {
+                M:  { active: true, hours: 8 }, T:  { active: true, hours: 8 },
+                W:  { active: true, hours: 8 }, TH: { active: true, hours: 8 },
+                F:  { active: true, hours: 8 }, Sa: { active: false, hours: 8 },
+                Su: { active: false, hours: 8 }
+              }
+            });
+            changed = true;
+          }
+        });
+        if (changed) { saveState(); renderAll(); }
+      } catch(e) { console.log("Could not load employees from sheet:", e); }
+    }
+
+    // ── Date Range Attendance Report ───────────────────────────────────────
+    async function generateReport() {
+      const from = document.getElementById("reportFrom").value;
+      const to   = document.getElementById("reportTo").value;
+      const statusEl = document.getElementById("reportStatus");
+      const table = document.getElementById("reportTable");
+
+      if (!from || !to) { statusEl.textContent = "Please select both From and To dates."; return; }
+      if (from > to)    { statusEl.textContent = "From date must be before To date."; return; }
+
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
+        statusEl.textContent = "Apps Script URL not configured."; return;
+      }
+
+      statusEl.textContent = "Loading...";
+      table.style.display = "none";
+
+      try {
+        const res = await fetch(`${GOOGLE_SHEET_URL}?action=getReport&from=${from}&to=${to}`, { cache: "no-cache" });
+        const data = await res.json();
+
+        if (!data.rows || data.rows.length === 0) {
+          statusEl.textContent = "No attendance data found for this date range.";
+          return;
+        }
+
+        // Build date columns between from and to
+        const dates = [];
+        let cur = new Date(from + "T00:00:00");
+        const end = new Date(to   + "T00:00:00");
+        while (cur <= end) {
+          dates.push(cur.toLocaleDateString("en-CA"));
+          cur.setDate(cur.getDate() + 1);
+        }
+
+        // Group rows by employee code
+        const empMap = {};
+        data.rows.forEach(r => {
+          if (!empMap[r.code]) empMap[r.code] = { name: r.name, dept: r.dept, pos: r.pos, days: {} };
+          empMap[r.code].days[r.date] = r.hours; // "HH:MM:SS" or minutes
+        });
+
+        // Build table header
+        const head = document.getElementById("reportHead");
+        const body = document.getElementById("reportBody");
+        head.innerHTML = `<tr>
+          <th>#</th><th>Name</th><th>Department</th><th>Position</th><th>Total</th>
+          ${dates.map(d => {
+            const dt = new Date(d + "T00:00:00");
+            return `<th>${dt.toLocaleDateString("en-US",{month:"short",day:"numeric"})}</th>`;
+          }).join("")}
+        </tr>`;
+
+        let rowNum = 1;
+        body.innerHTML = Object.entries(empMap).map(([code, emp]) => {
+          let totalMins = 0;
+          const dayCells = dates.map(d => {
+            const val = emp.days[d];
+            if (!val || val === "-" || val === "") return `<td>-</td>`;
+            // val is "HH:MM" or minutes number
+            let mins = 0;
+            if (typeof val === "number") { mins = val; }
+            else if (String(val).includes(":")) {
+              const parts = String(val).split(":").map(Number);
+              mins = (parts[0]||0)*60 + (parts[1]||0);
+            }
+            totalMins += mins;
+            const h = Math.floor(mins/60), m = mins%60;
+            return `<td>${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}</td>`;
+          });
+          const th = Math.floor(totalMins/60), tm = totalMins%60;
+          const total = `${String(th).padStart(2,"0")}:${String(tm).padStart(2,"0")}`;
+          return `<tr>
+            <td>${rowNum++}</td>
+            <td>${emp.name}</td><td>${emp.dept}</td><td>${emp.pos}</td>
+            <td class="total-col">${total}</td>
+            ${dayCells.join("")}
+          </tr>`;
+        }).join("");
+
+        table.style.display = "";
+        statusEl.textContent = `Showing ${Object.keys(empMap).length} employee(s) · ${dates.length} day(s)`;
+      } catch(e) {
+        statusEl.textContent = "Error loading report. Check your Apps Script URL.";
+      }
     }
 
     function renderAll() {
@@ -1455,6 +1607,13 @@
       attachEvents();
       renderAll();
       renderKioskFromUrl();
+      // Set default report dates to current month
+      const now = new Date();
+      const y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,"0");
+      document.getElementById("reportFrom").value = `${y}-${m}-01`;
+      document.getElementById("reportTo").value   = now.toLocaleDateString("en-CA");
+      // Load employees from Google Sheets
+      loadEmployeesFromSheet();
     });
   </script>
 </body>
