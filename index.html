@@ -1101,7 +1101,7 @@
       list.innerHTML = state.logs.map(log => `
         <div class="log-item">
           <div>
-            <div><strong>${log.employeeName}</strong> • ${log.lastActionLabel}</div>
+            <div><strong>${log.employeeName}</strong> • ${log.lastActionLabel || log.lastAction || ""}</div>
             <div class="muted">${log.date} • ${log.time} • ${log.employeeCode}</div>
           </div>
           <div class="log-badge">${log.source}</div>
@@ -1111,7 +1111,7 @@
 
 
     async function syncToGoogleSheets(payload) {
-      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec") {
         return { ok: false, message: "Google Sheets URL not configured." };
       }
       try {
@@ -1376,9 +1376,15 @@
         alert("Employee code and name are required.");
         return;
       }
-      if (state.employees.some(e => e.code.toUpperCase() === code)) {
-        alert("Employee code already exists.");
-        return;
+      if (state.employees.some(e => e.code.toUpperCase() === code && e.id !== `emp-${code}`)) {
+        // Only block if it's a real local employee (not one auto-imported from sheet)
+        const localEmp = state.employees.find(e => e.code.toUpperCase() === code);
+        if (localEmp && !localEmp.fromSheet) {
+          alert("Employee code already exists.");
+          return;
+        }
+        // Remove the auto-imported placeholder so we can save the full version
+        state.employees = state.employees.filter(e => e.code.toUpperCase() !== code);
       }
       // Read hours selects (in case user changed without blur)
       DAYS.forEach(day => {
@@ -1472,7 +1478,7 @@
 
     // ── Load employees from Google Sheets on startup ───────────────────────
     async function loadEmployeesFromSheet() {
-      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") return;
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec") return;
       try {
         const res = await fetch(`${GOOGLE_SHEET_URL}?action=getEmployees`, { cache: "no-cache" });
         const data = await res.json();
@@ -1489,6 +1495,7 @@
               position: emp.position,
               department: emp.department,
               shift: emp.shift || "morning",
+              fromSheet: true, // flag so we know it came from sheet
               schedule: {
                 M:  { active: true, hours: 8 }, T:  { active: true, hours: 8 },
                 W:  { active: true, hours: 8 }, TH: { active: true, hours: 8 },
@@ -1513,7 +1520,7 @@
       if (!from || !to) { statusEl.textContent = "Please select both From and To dates."; return; }
       if (from > to)    { statusEl.textContent = "From date must be before To date."; return; }
 
-      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec") {
         statusEl.textContent = "Apps Script URL not configured."; return;
       }
 
