@@ -1476,37 +1476,63 @@
       document.getElementById("empQrSubtitle").textContent = "Code: " + code;
       document.getElementById("modalQrDriveStatus").textContent = "";
 
-      // Generate QR in modal
+      // Generate QR in modal - try local library first, fallback to QR API
       const base = `${location.origin}${location.pathname.replace(/index\.html$/, "")}`;
       const kioskUrl = `${base}kiosk.html`;
       const modalWrap = document.getElementById("modalQrWrap");
       let modalQrDataUrl = null;
 
-      function generateModalQR() {
+      async function generateModalQR() {
+        // Try local QRCode library
         if (window.QRCode) {
-          QRCode.toDataURL(kioskUrl, { width: 240, margin: 2, color: { dark:"#000", light:"#fff" } }, async function(err, url) {
-            if (err) { modalWrap.innerHTML = `<span style="color:red;font-size:12px;">QR error</span>`; return; }
+          try {
+            const url = await new Promise((resolve, reject) => {
+              QRCode.toDataURL(kioskUrl, { width: 240, margin: 2, color: { dark:"#000", light:"#fff" } }, (err, u) => {
+                if (err) reject(err); else resolve(u);
+              });
+            });
             modalQrDataUrl = url;
             const img = document.createElement("img");
             img.src = url;
             img.style.cssText = "width:240px;height:240px;display:block;border-radius:8px;";
             modalWrap.innerHTML = ""; modalWrap.appendChild(img);
-
-            // Wire download button
-            document.getElementById("modalDownloadQrBtn").onclick = function() {
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = `QR_${code}_${name.replace(/\s+/g,"_")}.png`;
-              a.click();
-            };
-
-            // Auto-save to Drive
+            setupQrButtons(code, name, url);
             await saveQrToDrive(code, name, url);
-          });
-        } else {
-          setTimeout(generateModalQR, 300);
+            return;
+          } catch(e) {}
         }
+
+        // Fallback: use QR API image (no library needed)
+        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(kioskUrl)}&format=png`;
+        const img = document.createElement("img");
+        img.crossOrigin = "anonymous";
+        img.style.cssText = "width:240px;height:240px;display:block;border-radius:8px;";
+        img.onload = async function() {
+          // Convert to base64 for Drive save
+          const canvas = document.createElement("canvas");
+          canvas.width = 240; canvas.height = 240;
+          canvas.getContext("2d").drawImage(img, 0, 0);
+          modalQrDataUrl = canvas.toDataURL("image/png");
+          modalWrap.innerHTML = ""; modalWrap.appendChild(img);
+          setupQrButtons(code, name, modalQrDataUrl);
+          await saveQrToDrive(code, name, modalQrDataUrl);
+        };
+        img.onerror = function() {
+          modalWrap.innerHTML = `<span style="font-size:12px;color:#dc2626;">Could not generate QR. Check internet.</span>`;
+        };
+        img.src = qrApiUrl;
+        modalWrap.innerHTML = ""; modalWrap.appendChild(img);
       }
+
+      function setupQrButtons(code, name, dataUrl) {
+        document.getElementById("modalDownloadQrBtn").onclick = function() {
+          const a = document.createElement("a");
+          a.href = dataUrl;
+          a.download = `QR_${code}_${name.replace(/\s+/g,"_")}.png`;
+          a.click();
+        };
+      }
+
       generateModalQR();
 
       // Send employee data to Google Sheets
@@ -1618,7 +1644,7 @@
 
     // ── Load employees from Google Sheets on startup ───────────────────────
     async function loadEmployeesFromSheet() {
-      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec") return;
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") return;
       try {
         const res = await fetch(`${GOOGLE_SHEET_URL}?action=getEmployees`, { cache: "no-cache" });
         const data = await res.json();
