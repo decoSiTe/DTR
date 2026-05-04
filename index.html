@@ -559,7 +559,7 @@
       <div class="grid grid-3 no-print" style="margin-top:20px;">
         <div class="card">
           <h3>Employee QR</h3>
-          <p class="desc">Print or share this QR. It opens the employee kiosk page for the selected employee.</p>
+          <p class="desc">Print or share this QR. It opens the employee kiosk page.</p>
           <div class="qr-box">
             <div id="qrImageWrap" style="min-height:220px; display:flex; align-items:center; justify-content:center; background:#f8f8f8; border-radius:8px;"></div>
           </div>
@@ -568,6 +568,11 @@
             <div><span class="muted">Code:</span> <strong id="qrEmployeeCode"></strong></div>
           </div>
           <div class="code-line" id="qrValueText"></div>
+          <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="btn" id="downloadQrBtn" style="font-size:12px; padding:9px 12px;">⬇ Download QR</button>
+            <button class="btn secondary" id="saveQrDriveBtn" style="font-size:12px; padding:9px 12px;">☁ Save to Drive</button>
+          </div>
+          <div id="qrDriveStatus" style="font-size:12px; color:var(--muted); margin-top:8px; text-align:center;"></div>
         </div>
 
         <div class="card" style="grid-column: span 2;">
@@ -752,7 +757,8 @@
   </div>
 
   <script>
-const STORAGE_KEY = "dtr-index-html-v1"
+    const STORAGE_KEY = "dtr-index-html-v1";
+
     // ── Paste your Google Apps Script Web App URL here ──────────────────────
     const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec";
     // ────────────────────────────────────────────────────────────────────────
@@ -1054,6 +1060,8 @@ const STORAGE_KEY = "dtr-index-html-v1"
       `;
     }
 
+    let currentQrDataUrl = null;
+
     function renderQR() {
       const emp = selectedEmployee();
       if (!emp) return;
@@ -1070,29 +1078,62 @@ const STORAGE_KEY = "dtr-index-html-v1"
       const wrap = document.getElementById("qrImageWrap");
       if (!wrap) return;
       wrap.innerHTML = `<div style="color:#94a3b8;font-size:13px;">Generating QR...</div>`;
+      currentQrDataUrl = null;
 
       let attempts = 0;
       function tryDraw() {
         attempts++;
         if (window.QRCode) {
           QRCode.toDataURL(kioskUrl, { width: 240, margin: 2, color: { dark: "#000", light: "#fff" } }, function(err, url) {
-            if (err) {
-              wrap.innerHTML = `<div style="color:red;font-size:12px;">QR error: ${err}</div>`;
-              return;
-            }
+            if (err) { wrap.innerHTML = `<div style="color:red;font-size:12px;">QR error</div>`; return; }
+            currentQrDataUrl = url;
             const img = document.createElement("img");
             img.src = url;
             img.style.cssText = "width:240px;height:240px;display:block;border-radius:8px;";
-            wrap.innerHTML = "";
-            wrap.appendChild(img);
+            wrap.innerHTML = ""; wrap.appendChild(img);
+            // Auto-save to Drive when QR is generated
+            autoSaveQrToDrive(emp, url);
           });
         } else if (attempts < 30) {
           setTimeout(tryDraw, 300);
         } else {
-          wrap.innerHTML = `<div style="color:#94a3b8;font-size:12px;">QR library not loaded. Check internet connection.</div>`;
+          wrap.innerHTML = `<div style="color:#94a3b8;font-size:12px;">QR library not loaded.</div>`;
         }
       }
       tryDraw();
+    }
+
+    function downloadQR() {
+      const emp = selectedEmployee();
+      if (!currentQrDataUrl || !emp) return;
+      const a = document.createElement("a");
+      a.href = currentQrDataUrl;
+      a.download = `QR_${emp.code}_${emp.name.replace(/\s+/g,"_")}.png`;
+      a.click();
+    }
+
+    async function autoSaveQrToDrive(emp, dataUrl) {
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") return;
+      const statusEl = document.getElementById("qrDriveStatus");
+      if (statusEl) statusEl.textContent = "Saving QR to Drive...";
+      try {
+        // Convert dataURL to base64
+        const base64 = dataUrl.split(",")[1];
+        const payload = {
+          type: "saveQR",
+          employeeCode: emp.code,
+          employeeName: emp.name,
+          qrBase64: base64
+        };
+        await fetch(GOOGLE_SHEET_URL, {
+          method: "POST", mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+        if (statusEl) { statusEl.textContent = "✓ QR saved to Google Drive"; statusEl.style.color = "var(--success)"; }
+      } catch(e) {
+        if (statusEl) { statusEl.textContent = "⚠ Could not save to Drive"; statusEl.style.color = "var(--danger)"; }
+      }
     }
 
     function renderLogs() {
@@ -1487,12 +1528,17 @@ const STORAGE_KEY = "dtr-index-html-v1"
         if (e.target.id === "employeeModal") closeEmployeeModal();
       });
 
+      document.getElementById("downloadQrBtn").addEventListener("click", downloadQR);
+      document.getElementById("saveQrDriveBtn").addEventListener("click", function() {
+        const emp = selectedEmployee();
+        if (currentQrDataUrl && emp) autoSaveQrToDrive(emp, currentQrDataUrl);
+      });
       document.getElementById("runReportBtn").addEventListener("click", generateReport);
     }
 
     // ── Load employees from Google Sheets on startup ───────────────────────
     async function loadEmployeesFromSheet() {
-      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec") return;
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") return;
       try {
         const res = await fetch(`${GOOGLE_SHEET_URL}?action=getEmployees`, { cache: "no-cache" });
         const data = await res.json();
