@@ -705,54 +705,76 @@
 
   <div class="modal" id="employeeModal">
     <div class="modal-card">
-      <h3>Add Employee</h3>
-      <p class="desc" style="margin-bottom:16px;">Create an employee and configure their shift schedule.</p>
 
-      <div class="form-grid">
-        <div class="field">
-          <label>Employee Code</label>
-          <input id="modalCode" placeholder="EMP001" />
+      <!-- Step 1: Form -->
+      <div id="empFormStep">
+        <h3>Add Employee</h3>
+        <p class="desc" style="margin-bottom:16px;">Create an employee and configure their shift schedule.</p>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>Employee Code</label>
+            <input id="modalCode" placeholder="EMP001" />
+          </div>
+          <div class="field">
+            <label>Name</label>
+            <input id="modalName" placeholder="Employee name" />
+          </div>
+          <div class="field">
+            <label>Position</label>
+            <input id="modalPosition" placeholder="Position" />
+          </div>
+          <div class="field">
+            <label>Department</label>
+            <input id="modalDepartment" placeholder="Department" />
+          </div>
         </div>
-        <div class="field">
-          <label>Name</label>
-          <input id="modalName" placeholder="Employee name" />
+
+        <div style="margin-top:18px;">
+          <label style="font-weight:600; font-size:14px;">Shift Type</label>
+          <div class="shift-toggle" style="margin-top:8px;">
+            <button type="button" class="shift-toggle-btn active" id="btnMorning" onclick="selectShift('morning')">
+              <span class="shift-dot"></span> Morning Shift
+            </button>
+            <button type="button" class="shift-toggle-btn" id="btnAfternoon" onclick="selectShift('afternoon')">
+              <span class="shift-dot hollow"></span> Afternoon Shift
+            </button>
+          </div>
         </div>
-        <div class="field">
-          <label>Position</label>
-          <input id="modalPosition" placeholder="Position" />
+
+        <div style="margin-top:16px;">
+          <label style="font-weight:600; font-size:14px;">Work Days &amp; Hours</label>
+          <p style="font-size:12px; color:var(--muted); margin:4px 0 10px;">Check each working day, then choose 8hrs or 12hrs duty.</p>
+          <div class="day-schedule-grid" id="dayScheduleGrid"></div>
         </div>
-        <div class="field">
-          <label>Department</label>
-          <input id="modalDepartment" placeholder="Department" />
+
+        <div class="modal-actions">
+          <button class="btn secondary" id="cancelEmployeeBtn">Cancel</button>
+          <button class="btn" id="saveEmployeeBtn">Save Employee</button>
         </div>
       </div>
 
-      <!-- Shift Type Toggle -->
-      <div style="margin-top:18px;">
-        <label style="font-weight:600; font-size:14px;">Shift Type</label>
-        <div class="shift-toggle" style="margin-top:8px;">
-          <button type="button" class="shift-toggle-btn active" id="btnMorning" onclick="selectShift('morning')">
-            <span class="shift-dot"></span> Morning Shift
-          </button>
-          <button type="button" class="shift-toggle-btn" id="btnAfternoon" onclick="selectShift('afternoon')">
-            <span class="shift-dot hollow"></span> Afternoon Shift
-          </button>
+      <!-- Step 2: QR Success -->
+      <div id="empQrStep" style="display:none; text-align:center;">
+        <div style="font-size:32px; margin-bottom:8px;">✅</div>
+        <h3 id="empQrTitle" style="margin-bottom:4px;"></h3>
+        <p class="desc" id="empQrSubtitle" style="margin-bottom:16px;"></p>
+
+        <div style="display:flex; justify-content:center; margin-bottom:16px;">
+          <div id="modalQrWrap" style="width:240px; height:240px; display:flex; align-items:center; justify-content:center; background:#f8f8f8; border-radius:12px; border:1px solid var(--border);">
+            <span style="color:#94a3b8; font-size:13px;">Generating QR...</span>
+          </div>
         </div>
+
+        <p style="font-size:12px; color:var(--muted); margin-bottom:16px;">This QR opens the Employee Kiosk. Print or save it for the employee.</p>
+
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <button class="btn" id="modalDownloadQrBtn" style="width:auto; padding:10px 20px;">⬇ Download QR</button>
+          <button class="btn secondary" id="modalDoneBtn" style="width:auto; padding:10px 20px;">Done</button>
+        </div>
+        <div id="modalQrDriveStatus" style="font-size:12px; color:var(--muted); margin-top:10px;"></div>
       </div>
 
-      <!-- Day Schedule -->
-      <div style="margin-top:16px;">
-        <label style="font-weight:600; font-size:14px;">Work Days &amp; Hours</label>
-        <p style="font-size:12px; color:var(--muted); margin:4px 0 10px;">Check each working day, then choose 8hrs or 12hrs duty.</p>
-        <div class="day-schedule-grid" id="dayScheduleGrid">
-          <!-- rendered by JS -->
-        </div>
-      </div>
-
-      <div class="modal-actions">
-        <button class="btn secondary" id="cancelEmployeeBtn">Cancel</button>
-        <button class="btn" id="saveEmployeeBtn">Save Employee</button>
-      </div>
     </div>
   </div>
 
@@ -1345,6 +1367,10 @@
 
     function closeEmployeeModal() {
       document.getElementById("employeeModal").classList.remove("open");
+      // Reset to form step
+      document.getElementById("empFormStep").style.display = "block";
+      document.getElementById("empQrStep").style.display = "none";
+      resetEmployeeModal();
     }
 
     const DAYS = ["M","T","W","TH","F","Sa","Su"];
@@ -1418,11 +1444,8 @@
       const name = document.getElementById("modalName").value.trim();
       if (!code || !name) { alert("Employee code and name are required."); return; }
 
-      // Check for real duplicate (not sheet-imported placeholder)
       const existing = state.employees.find(e => e.code.toUpperCase() === code);
-      if (existing && !existing.fromSheet) {
-        alert("Employee code already exists."); return;
-      }
+      if (existing && !existing.fromSheet) { alert("Employee code already exists."); return; }
       if (existing && existing.fromSheet) {
         state.employees = state.employees.filter(e => e.code.toUpperCase() !== code);
       }
@@ -1434,47 +1457,103 @@
 
       const employee = {
         id: `emp-${Date.now()}`,
-        code,
-        name,
-        position: document.getElementById("modalPosition").value.trim(),
+        code, name,
+        position:   document.getElementById("modalPosition").value.trim(),
         department: document.getElementById("modalDepartment").value.trim(),
-        shift: modalShift,
-        schedule: JSON.parse(JSON.stringify(modalDaySchedule))
+        shift:      modalShift,
+        schedule:   JSON.parse(JSON.stringify(modalDaySchedule))
       };
 
       state.employees.push(employee);
       state.selectedEmployeeId = employee.id;
       saveState();
-      resetEmployeeModal();
-      closeEmployeeModal();
       renderAll();
 
-      // Send to Google Sheets — use POST + GET fallback
+      // Show QR step
+      document.getElementById("empFormStep").style.display = "none";
+      document.getElementById("empQrStep").style.display = "block";
+      document.getElementById("empQrTitle").textContent = name + " — Employee Added!";
+      document.getElementById("empQrSubtitle").textContent = "Code: " + code;
+      document.getElementById("modalQrDriveStatus").textContent = "";
+
+      // Generate QR in modal
+      const base = `${location.origin}${location.pathname.replace(/index\.html$/, "")}`;
+      const kioskUrl = `${base}kiosk.html`;
+      const modalWrap = document.getElementById("modalQrWrap");
+      let modalQrDataUrl = null;
+
+      function generateModalQR() {
+        if (window.QRCode) {
+          QRCode.toDataURL(kioskUrl, { width: 240, margin: 2, color: { dark:"#000", light:"#fff" } }, async function(err, url) {
+            if (err) { modalWrap.innerHTML = `<span style="color:red;font-size:12px;">QR error</span>`; return; }
+            modalQrDataUrl = url;
+            const img = document.createElement("img");
+            img.src = url;
+            img.style.cssText = "width:240px;height:240px;display:block;border-radius:8px;";
+            modalWrap.innerHTML = ""; modalWrap.appendChild(img);
+
+            // Wire download button
+            document.getElementById("modalDownloadQrBtn").onclick = function() {
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `QR_${code}_${name.replace(/\s+/g,"_")}.png`;
+              a.click();
+            };
+
+            // Auto-save to Drive
+            await saveQrToDrive(code, name, url);
+          });
+        } else {
+          setTimeout(generateModalQR, 300);
+        }
+      }
+      generateModalQR();
+
+      // Send employee data to Google Sheets
       if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL !== "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec") {
         const payload = {
           type: "employee",
           employeeCode: employee.code,
           employeeName: employee.name,
-          department: employee.department,
-          position: employee.position,
-          shift: employee.shift,
-          schedule: Object.entries(employee.schedule)
+          department:   employee.department,
+          position:     employee.position,
+          shift:        employee.shift,
+          schedule:     Object.entries(employee.schedule)
             .filter(([, v]) => v.active)
             .map(([day, v]) => `${day}:${v.hours}hrs`)
             .join(", ")
         };
         try {
           await fetch(GOOGLE_SHEET_URL, {
-            method: "POST", mode: "no-cors",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            method:"POST", mode:"no-cors",
+            headers:{"Content-Type":"text/plain;charset=utf-8"},
             body: JSON.stringify(payload)
           });
         } catch(e) {
-          // GET fallback
-          try {
-            new Image().src = GOOGLE_SHEET_URL + "?data=" + encodeURIComponent(JSON.stringify(payload));
-          } catch(_) {}
+          try { new Image().src = GOOGLE_SHEET_URL + "?data=" + encodeURIComponent(JSON.stringify(payload)); } catch(_){}
         }
+      }
+    }
+
+    async function saveQrToDrive(code, name, dataUrl) {
+      const statusEl = document.getElementById("modalQrDriveStatus");
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") return;
+      if (statusEl) statusEl.textContent = "☁ Saving QR to Google Drive...";
+      try {
+        const base64 = dataUrl.split(",")[1];
+        await fetch(GOOGLE_SHEET_URL, {
+          method:"POST", mode:"no-cors",
+          headers:{"Content-Type":"text/plain;charset=utf-8"},
+          body: JSON.stringify({
+            type:"saveQR",
+            employeeCode: code,
+            employeeName: name,
+            qrBase64: base64
+          })
+        });
+        if (statusEl) { statusEl.textContent = "✓ QR saved to Google Drive (Employee QR Codes folder)"; statusEl.style.color = "var(--success,#15803d)"; }
+      } catch(e) {
+        if (statusEl) { statusEl.textContent = "⚠ Could not save to Drive — download it manually"; statusEl.style.color = "var(--danger,#dc2626)"; }
       }
     }
 
@@ -1523,6 +1602,7 @@
       document.getElementById("openAddEmployeeBtn").addEventListener("click", openEmployeeModal);
       document.getElementById("cancelEmployeeBtn").addEventListener("click", closeEmployeeModal);
       document.getElementById("saveEmployeeBtn").addEventListener("click", saveEmployeeFromModal);
+      document.getElementById("modalDoneBtn").addEventListener("click", closeEmployeeModal);
       document.getElementById("deleteEmployeeBtn").addEventListener("click", deleteSelectedEmployee);
       document.getElementById("employeeModal").addEventListener("click", (e) => {
         if (e.target.id === "employeeModal") closeEmployeeModal();
@@ -1538,7 +1618,7 @@
 
     // ── Load employees from Google Sheets on startup ───────────────────────
     async function loadEmployeesFromSheet() {
-      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") return;
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec") return;
       try {
         const res = await fetch(`${GOOGLE_SHEET_URL}?action=getEmployees`, { cache: "no-cache" });
         const data = await res.json();
