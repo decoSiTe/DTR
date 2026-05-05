@@ -1135,7 +1135,7 @@
     }
 
     async function autoSaveQrToDrive(emp, dataUrl) {
-      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") return;
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "https://drive.google.com/drive/folders/1-y4dtzfTNQnF1Mj8RuJdWxhAY7ewLHSy?usp=drive_link") return;
       const statusEl = document.getElementById("qrDriveStatus");
       if (statusEl) statusEl.textContent = "Saving QR to Drive...";
       try {
@@ -1444,10 +1444,8 @@
       const name = document.getElementById("modalName").value.trim();
       if (!code || !name) { alert("Employee code and name are required."); return; }
 
-      const existing = state.employees.find(e => e.code.toUpperCase() === code);
-      if (existing && !existing.fromSheet) { alert("Employee code already exists."); return; }
-      if (existing && existing.fromSheet) {
-        state.employees = state.employees.filter(e => e.code.toUpperCase() !== code);
+      if (sheetEmployees.find(e => e.code.toUpperCase() === code)) {
+        alert("Employee code already exists."); return;
       }
 
       DAYS.forEach(day => {
@@ -1456,7 +1454,7 @@
       });
 
       const employee = {
-        id: `emp-${Date.now()}`,
+        id: `emp-${code}`,
         code, name,
         position:   document.getElementById("modalPosition").value.trim(),
         department: document.getElementById("modalDepartment").value.trim(),
@@ -1464,7 +1462,38 @@
         schedule:   JSON.parse(JSON.stringify(modalDaySchedule))
       };
 
-      state.employees.push(employee);
+      // Show QR step immediately
+      document.getElementById("empFormStep").style.display = "none";
+      document.getElementById("empQrStep").style.display = "block";
+      document.getElementById("empQrTitle").textContent = name + " — Employee Added!";
+      document.getElementById("empQrSubtitle").textContent = "Code: " + code;
+      document.getElementById("modalQrDriveStatus").textContent = "Saving to Google Sheets...";
+      document.getElementById("modalQrDriveStatus").style.color = "var(--muted)";
+
+      // 1. Save to Google Sheets FIRST
+      const scheduleStr = Object.entries(employee.schedule)
+        .filter(([, v]) => v.active)
+        .map(([day, v]) => `${day}:${v.hours}hrs`).join(", ");
+      const payload = {
+        type:"employee", employeeCode:code, employeeName:name,
+        department:employee.department, position:employee.position,
+        shift:employee.shift, schedule:scheduleStr
+      };
+      try {
+        await fetch(GOOGLE_SHEET_URL, {
+          method:"POST", mode:"no-cors",
+          headers:{"Content-Type":"text/plain;charset=utf-8"},
+          body: JSON.stringify(payload)
+        });
+        document.getElementById("modalQrDriveStatus").textContent = "✓ Saved to Google Sheets";
+        document.getElementById("modalQrDriveStatus").style.color = "#15803d";
+      } catch(e) {
+        document.getElementById("modalQrDriveStatus").textContent = "⚠ Sheet save failed";
+        document.getElementById("modalQrDriveStatus").style.color = "#dc2626";
+      }
+
+      // 2. Add to local list so UI updates immediately
+      sheetEmployees.push(employee);
       state.selectedEmployeeId = employee.id;
       saveState();
       renderAll();
@@ -1644,35 +1673,34 @@
 
     // ── Load employees from Google Sheets on startup ───────────────────────
     async function loadEmployeesFromSheet() {
-      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") return;
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec") return;
       try {
         const res = await fetch(`${GOOGLE_SHEET_URL}?action=getEmployees`, { cache: "no-cache" });
         const data = await res.json();
         if (!data.employees || data.employees.length === 0) return;
-        // Merge sheet employees into state — add new ones, skip existing
-        let changed = false;
-        data.employees.forEach(emp => {
-          const exists = state.employees.find(e => e.code.toUpperCase() === emp.code.toUpperCase());
-          if (!exists) {
-            state.employees.push({
-              id: `emp-${emp.code}`,
-              code: emp.code,
-              name: emp.name,
-              position: emp.position,
-              department: emp.department,
-              shift: emp.shift || "morning",
-              fromSheet: true, // flag so we know it came from sheet
-              schedule: {
-                M:  { active: true, hours: 8 }, T:  { active: true, hours: 8 },
-                W:  { active: true, hours: 8 }, TH: { active: true, hours: 8 },
-                F:  { active: true, hours: 8 }, Sa: { active: false, hours: 8 },
-                Su: { active: false, hours: 8 }
-              }
-            });
-            changed = true;
+
+        // Replace sheetEmployees entirely — Sheets is the only source of truth
+        sheetEmployees = data.employees.map(emp => ({
+          id: `emp-${emp.code}`,
+          code: emp.code,
+          name: emp.name,
+          position: emp.position,
+          department: emp.department,
+          shift: emp.shift || "morning",
+          schedule: {
+            M:  { active: true, hours: 8 }, T:  { active: true, hours: 8 },
+            W:  { active: true, hours: 8 }, TH: { active: true, hours: 8 },
+            F:  { active: true, hours: 8 }, Sa: { active: false, hours: 8 },
+            Su: { active: false, hours: 8 }
           }
-        });
-        if (changed) { saveState(); renderAll(); }
+        }));
+
+        // Auto-select first if none selected
+        if (!state.selectedEmployeeId || !sheetEmployees.find(e => e.id === state.selectedEmployeeId)) {
+          state.selectedEmployeeId = sheetEmployees[0]?.id || "";
+        }
+        saveState();
+        renderAll();
       } catch(e) { console.log("Could not load employees from sheet:", e); }
     }
 
