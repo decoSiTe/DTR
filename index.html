@@ -675,7 +675,7 @@
 
     <main class="main">
       <div class="titlebar">
-        <div class="brand"><span class="brand-mark"></span><span id="pageTitle">Executors DRT</span></div>
+        <div class="brand"><span class="brand-mark"></span><span id="pageTitle">Executors</span></div>
         <div class="top-actions">
           <button class="icon-btn" id="openDriveBtn" title="Employee QR Codes Drive folder">QR Drive</button>
           <button class="icon-btn" id="refreshBtn" title="Refresh report">⟳</button>
@@ -772,7 +772,7 @@
                 <div class="schedule-editor">
                   <div class="schedule-title-row">
                     <strong>Schedule</strong>
-                    <div class="schedule-note">Tick working days from Monday to Sunday, then select 8 hrs or 12 hrs.</div>
+                    <div class="schedule-note">Tick working days from Monday to Sunday, then select 8 hrs or 12 hours.</div>
                   </div>
                   <div id="scheduleGrid" class="schedule-grid"></div>
                 </div>
@@ -882,18 +882,18 @@
 
     function defaultScheduleState() {
       return {
-        M:  { active: true,  hrs: 8 },
-        T:  { active: true,  hrs: 8 },
-        W:  { active: true,  hrs: 8 },
-        TH: { active: true,  hrs: 8 },
-        F:  { active: true,  hrs: 8 },
-        Sa: { active: false, hrs: 8 },
-        Su: { active: false, hrs: 8 }
+        M:  { active: true,  hours: 8 },
+        T:  { active: true,  hours: 8 },
+        W:  { active: true,  hours: 8 },
+        TH: { active: true,  hours: 8 },
+        F:  { active: true,  hours: 8 },
+        Sa: { active: false, hours: 8 },
+        Su: { active: false, hours: 8 }
       };
     }
 
-    function dutyRange(shift, hrs) {
-      const h = Number(hrs) === 12 ? 12 : 8;
+    function dutyRange(shift, hours) {
+      const h = Number(hours) === 12 ? 12 : 8;
       if (shift === "afternoon") {
         return h === 12 ? "7:00 PM - 7:00 AM" : "7:00 PM - 4:00 AM";
       }
@@ -909,8 +909,8 @@
 
       document.querySelectorAll(".schedule-duty").forEach(el => {
         const day = el.dataset.day;
-        const dayState = scheduleState[day] || { active: false, hrs: 8 };
-        el.textContent = dayState.active ? dutyRange(shift, dayState.hrs) : "Day off";
+        const dayState = scheduleState[day] || { active: false, hours: 8 };
+        el.textContent = dayState.active ? dutyRange(shift, dayState.hours) : "Day off";
       });
     }
 
@@ -919,7 +919,7 @@
       if (!grid) return;
       const shift = document.getElementById("empShift")?.value || "morning";
       grid.innerHTML = scheduleDays.map(day => {
-        const d = scheduleState[day.key] || { active: false, hrs: 8 };
+        const d = scheduleState[day.key] || { active: false, hours: 8 };
         const disabled = d.active ? "" : "disabled";
         return `
           <div class="schedule-day ${disabled}">
@@ -927,32 +927,32 @@
               <input type="checkbox" ${d.active ? "checked" : ""} onchange="toggleScheduleDay('${day.key}', this.checked)">
               <span>${day.label}</span>
             </label>
-            <select onchange="setSchedulehrs('${day.key}', this.value)" ${d.active ? "" : "disabled"}>
-              <option value="8" ${Number(d.hrs) === 8 ? "selected" : ""}>8 hrs</option>
-              <option value="12" ${Number(d.hrs) === 12 ? "selected" : ""}>12 hrs</option>
+            <select onchange="setScheduleHours('${day.key}', this.value)" ${d.active ? "" : "disabled"}>
+              <option value="8" ${Number(d.hours) === 8 ? "selected" : ""}>8 hours</option>
+              <option value="12" ${Number(d.hours) === 12 ? "selected" : ""}>12 hours</option>
             </select>
-            <div class="schedule-duty" data-day="${day.key}">${d.active ? dutyRange(shift, d.hrs) : "Day off"}</div>
+            <div class="schedule-duty" data-day="${day.key}">${d.active ? dutyRange(shift, d.hours) : "Day off"}</div>
           </div>`;
       }).join("");
       updateDutySummary();
     }
 
     function toggleScheduleDay(day, checked) {
-      if (!scheduleState[day]) scheduleState[day] = { active: false, hrs: 8 };
+      if (!scheduleState[day]) scheduleState[day] = { active: false, hours: 8 };
       scheduleState[day].active = !!checked;
       renderScheduleEditor();
     }
 
-    function setSchedulehrs(day, value) {
-      if (!scheduleState[day]) scheduleState[day] = { active: true, hrs: 8 };
-      scheduleState[day].hrs = Number(value) === 12 ? 12 : 8;
+    function setScheduleHours(day, value) {
+      if (!scheduleState[day]) scheduleState[day] = { active: true, hours: 8 };
+      scheduleState[day].hours = Number(value) === 12 ? 12 : 8;
       updateDutySummary();
     }
 
     function buildScheduleString() {
       return scheduleDays
         .filter(day => scheduleState[day.key] && scheduleState[day.key].active)
-        .map(day => `${day.key}:${Number(scheduleState[day.key].hrs) === 12 ? 12 : 8}hrs`)
+        .map(day => `${day.key}:${Number(scheduleState[day.key].hours) === 12 ? 12 : 8}hrs`)
         .join(", ");
     }
 
@@ -965,7 +965,7 @@
         if (!match) return;
         const key = scheduleDays.find(d => d.key.toLowerCase() === match[1].toLowerCase())?.key;
         if (!key) return;
-        parsed[key] = { active: true, hrs: Number(match[2]) };
+        parsed[key] = { active: true, hours: Number(match[2]) };
       });
 
       if (!schedule || !schedule.trim()) return defaultScheduleState();
@@ -1016,7 +1016,7 @@
 
     function currentTime() {
       const d = new Date();
-      return pad(d.gethrs()) + ":" + pad(d.getMinutes());
+      return pad(d.getHours()) + ":" + pad(d.getMinutes());
     }
 
     function setMessage(id, message, type) {
@@ -1063,6 +1063,36 @@
 
     function sendData(payload) {
       return jsonpRequest({ data: JSON.stringify(payload) });
+    }
+
+    async function postDataNoCors(payload) {
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
+        throw new Error("Apps Script URL is not configured.");
+      }
+
+      await fetch(GOOGLE_SHEET_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+
+      // no-cors cannot read the Apps Script response, but the request reaches Apps Script.
+      return { ok: true };
+    }
+
+    function createEmployeeQrDataUrl(code, width = 300) {
+      return new Promise((resolve, reject) => {
+        if (!window.QRCode) {
+          reject(new Error("QR library not loaded."));
+          return;
+        }
+
+        const qrUrl = buildEmployeeQrUrl(code);
+        QRCode.toDataURL(qrUrl, { width, margin: 2 }, function (err, url) {
+          if (err) reject(err); else resolve(url);
+        });
+      });
     }
 
     function setupMonthOptions() {
@@ -1211,7 +1241,7 @@
             total: 0
           };
         }
-        const mins = Number(row.hrs || 0);
+        const mins = Number(row.hours || 0);
         map[key].name = row.name || map[key].name;
         map[key].department = row.dept || map[key].department;
         map[key].position = row.pos || map[key].position;
@@ -1320,14 +1350,14 @@
         return;
       }
 
-      QRCode.toDataURL(qrUrl, { width: 160, margin: 2 }, function (err, url) {
-        if (err) {
+      createEmployeeQrDataUrl(emp.code, 160)
+        .then(url => {
+          state.currentQrDataUrl = url;
+          box.innerHTML = `<img src="${url}" alt="QR Code" />`;
+        })
+        .catch(() => {
           box.innerHTML = `<span style="color:#dc2626;font-size:12px;">QR error.</span>`;
-          return;
-        }
-        state.currentQrDataUrl = url;
-        box.innerHTML = `<img src="${url}" alt="QR Code" />`;
-      });
+        });
     }
 
     function editEmployee(code) {
@@ -1379,11 +1409,21 @@
           department,
           position,
           shift,
-          schedule
+          schedule,
+          skipQR: true
         });
 
         if (!result.ok) throw new Error(result.error || "Save failed.");
-        setMessage("employeeMessage", "Saved. QR file created in Employee QR Codes Drive folder: " + (result.qrFile || ""), "ok");
+
+        const qrDataUrl = await createEmployeeQrDataUrl(code, 300);
+        await postDataNoCors({
+          type: "saveQR",
+          employeeCode: code,
+          employeeName: name,
+          qrBase64: qrDataUrl
+        });
+
+        setMessage("employeeMessage", "Saved. QR sent to Employee QR Codes Drive folder.", "ok");
         await loadEmployees();
         populateFilters();
         renderReport();
@@ -1412,9 +1452,26 @@
     async function generateAllQrs() {
       setMessage("employeeMessage", "Generating QR codes for all employees...");
       try {
-        const result = await jsonpRequest({ action: "generateAllQRs" });
-        if (!result.ok) throw new Error(result.error || "QR generation failed.");
-        setMessage("employeeMessage", "Generated " + result.saved + " QR file(s) in Employee QR Codes Drive folder.", "ok");
+        if (!state.employees.length) {
+          await loadEmployees();
+        }
+
+        let count = 0;
+        for (const emp of state.employees) {
+          if (!emp.code || !emp.name) continue;
+          setMessage("employeeMessage", `Saving QR ${count + 1} of ${state.employees.length}: ${emp.name}`);
+          const qrDataUrl = await createEmployeeQrDataUrl(emp.code, 300);
+          await postDataNoCors({
+            type: "saveQR",
+            employeeCode: emp.code,
+            employeeName: emp.name,
+            qrBase64: qrDataUrl
+          });
+          count++;
+          await new Promise(resolve => setTimeout(resolve, 250));
+        }
+
+        setMessage("employeeMessage", "Generated " + count + " QR file(s) in Employee QR Codes Drive folder.", "ok");
       } catch (err) {
         setMessage("employeeMessage", err.message, "err");
       }
@@ -1428,13 +1485,14 @@
       }
       setMessage("employeeMessage", "Saving QR to Drive...");
       try {
-        const result = await sendData({
+        const qrDataUrl = state.currentQrDataUrl || await createEmployeeQrDataUrl(emp.code, 300);
+        await postDataNoCors({
           type: "saveQR",
           employeeCode: emp.code,
-          employeeName: emp.name
+          employeeName: emp.name,
+          qrBase64: qrDataUrl
         });
-        if (!result.ok) throw new Error(result.error || "Could not save QR.");
-        setMessage("employeeMessage", "QR saved to Drive: " + result.fileName, "ok");
+        setMessage("employeeMessage", "QR sent to Employee QR Codes Drive folder.", "ok");
       } catch (err) {
         setMessage("employeeMessage", err.message, "err");
       }
