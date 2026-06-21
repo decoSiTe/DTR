@@ -268,12 +268,50 @@
     tbody tr:nth-child(even) td { background: var(--row-alt); }
     tbody tr:hover td { background: #eef5ff; }
 
-    .col-num { width: 48px; text-align: center; color: #111; }
-    .col-name { min-width: 220px; max-width: 260px; }
+    .col-num { width: 48px; min-width: 48px; text-align: center; color: #111; }
+    .col-name { width: 220px; min-width: 220px; max-width: 260px; }
     .col-dept { min-width: 145px; max-width: 170px; }
     .col-pos { min-width: 165px; max-width: 210px; }
     .col-total { min-width: 95px; font-weight: 700; }
     .date-col { min-width: 102px; text-align: center; }
+
+
+    /* Freeze # and Name columns when scrolling horizontally */
+    #reportTable th.col-num,
+    #reportTable td.col-num {
+      position: sticky;
+      left: 0;
+      z-index: 6;
+    }
+
+    #reportTable th.col-name,
+    #reportTable td.col-name {
+      position: sticky;
+      left: 48px;
+      z-index: 6;
+      box-shadow: 2px 0 0 var(--line-soft);
+    }
+
+    #reportTable thead th.col-num,
+    #reportTable thead th.col-name {
+      z-index: 12;
+      background: var(--header);
+    }
+
+    #reportTable tbody td.col-num,
+    #reportTable tbody td.col-name {
+      background: #fff;
+    }
+
+    #reportTable tbody tr:nth-child(even) td.col-num,
+    #reportTable tbody tr:nth-child(even) td.col-name {
+      background: var(--row-alt);
+    }
+
+    #reportTable tbody tr:hover td.col-num,
+    #reportTable tbody tr:hover td.col-name {
+      background: #eef5ff;
+    }
 
     .truncate {
       overflow: hidden;
@@ -314,29 +352,6 @@
       align-items: start;
     }
 
-    /* Employee QR page: keep the form fixed while the Employees table scrolls */
-    #employeesView .panel {
-      overflow: hidden;
-    }
-
-    #employeesView .cards {
-      height: calc(100vh - 68px);
-      align-items: stretch;
-    }
-
-    #employeesView .cards > .card:first-child {
-      height: 100%;
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-
-    #employeesView .cards > .card:nth-child(2) {
-      height: 100%;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-    }
-
     .card {
       border: 1px solid var(--line);
       background: #fff;
@@ -368,6 +383,8 @@
     .form-field { display: flex; flex-direction: column; gap: 5px; }
     .form-field label { font-size: 12px; font-weight: 700; }
     .form-field input, .form-field select {
+      width: 100%;
+      min-width: 0;
       height: 34px;
       border: 1px solid #d0d5dd;
       border-radius: 5px;
@@ -421,12 +438,6 @@
       overflow: auto;
       max-height: 580px;
       background: #fff;
-    }
-
-    #employeesView .employee-table-wrap {
-      flex: 1;
-      min-height: 0;
-      max-height: none;
     }
 
     .small-table {
@@ -553,7 +564,7 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       background: #fbfbfc;
-      padding: 8px;
+      padding: 10px;
       margin-top: 2px;
       width: 100%;
       max-width: 100%;
@@ -564,9 +575,9 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 8px;
-      margin-bottom: 7px;
-      flex-wrap: nowrap;
+      gap: 10px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
     }
 
     .schedule-title-row strong {
@@ -576,15 +587,15 @@
 
     .schedule-note {
       color: var(--muted);
-      font-size: 10.5px;
-      line-height: 1.25;
-      text-align: right;
-      flex: 1 1 auto;
+      font-size: 11px;
+      line-height: 1.35;
+      text-align: left;
+      flex: 1 1 180px;
     }
 
     .schedule-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(86px, 1fr));
       gap: 6px;
       width: 100%;
     }
@@ -603,14 +614,14 @@
       align-items: center;
       gap: 5px;
       font-weight: 700;
-      font-size: 11.5px;
-      margin-bottom: 5px;
+      font-size: 12px;
+      margin-bottom: 6px;
       white-space: nowrap;
     }
 
     .day-check-row input {
-      width: 13px;
-      height: 13px;
+      width: 14px;
+      height: 14px;
       margin: 0;
       accent-color: var(--purple);
       flex: 0 0 auto;
@@ -618,20 +629,18 @@
 
     .schedule-day select {
       width: 100%;
-      max-width: 100%;
       min-width: 0;
-      height: 27px;
+      height: 29px;
       font-size: 11px;
-      padding: 3px 4px;
-      display: block;
+      padding: 4px 4px;
     }
 
     .schedule-duty {
-      margin-top: 5px;
+      margin-top: 6px;
       color: var(--muted);
       font-size: 10px;
       line-height: 1.2;
-      min-height: 32px;
+      min-height: 36px;
       white-space: normal;
       overflow-wrap: anywhere;
     }
@@ -652,8 +661,6 @@
       .month-year, .field.wide { grid-column: span 2; }
       .action-grid { grid-template-columns: 1fr; }
       .schedule-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      #employeesView .panel { overflow: auto; }
-      #employeesView .cards { height: auto; }
     }
   </style>
 </head>
@@ -832,7 +839,9 @@
             <div class="action-grid">
               <button class="action-btn" data-action="arrival">Arrived</button>
               <button class="action-btn" data-action="breakStart">Break Start</button>
+              <button class="action-btn" data-action="shortBreakStart">Short Break Start</button>
               <button class="action-btn" data-action="breakEnd">Break End</button>
+              <button class="action-btn" data-action="shortBreakEnd">Short Break End</button>
               <button class="action-btn" data-action="departure">Departure</button>
             </div>
 
@@ -846,7 +855,6 @@
   <script>
     const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec";
     const QR_DRIVE_URL = "https://drive.google.com/drive/u/0/folders/1-y4dtzfTNQnF1Mj8RuJdWxhAY7ewLHSy";
-    const KIOSK_URL = "https://decosite.github.io/kioskdtr/index.html";
 
     const state = {
       employees: [],
@@ -1059,6 +1067,36 @@
       return jsonpRequest({ data: JSON.stringify(payload) });
     }
 
+    async function postDataNoCors(payload) {
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
+        throw new Error("Apps Script URL is not configured.");
+      }
+
+      await fetch(GOOGLE_SHEET_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+
+      // no-cors cannot read the Apps Script response, but the request reaches Apps Script.
+      return { ok: true };
+    }
+
+    function createEmployeeQrDataUrl(code, width = 300) {
+      return new Promise((resolve, reject) => {
+        if (!window.QRCode) {
+          reject(new Error("QR library not loaded."));
+          return;
+        }
+
+        const qrUrl = buildEmployeeQrUrl(code);
+        QRCode.toDataURL(qrUrl, { width, margin: 2 }, function (err, url) {
+          if (err) reject(err); else resolve(url);
+        });
+      });
+    }
+
     function setupMonthOptions() {
       const select = document.getElementById("monthSelect");
       select.innerHTML = monthNames.map((name, index) => `<option value="${index + 1}">${name}</option>`).join("");
@@ -1179,8 +1217,6 @@
       const pos = document.getElementById("positionFilter").value;
       const map = {};
 
-      // Employees sheet is the master data for Name, Department, and Position.
-      // DTR rows may contain old department/position values, so they should not overwrite Employees data.
       state.employees.forEach(emp => {
         const key = String(emp.code || "").toUpperCase();
         if (!key) return;
@@ -1189,7 +1225,6 @@
           name: emp.name,
           department: emp.department,
           position: emp.position,
-          fromEmployees: true,
           days: {},
           total: 0
         };
@@ -1204,21 +1239,14 @@
             name: row.name,
             department: row.dept,
             position: row.pos,
-            fromEmployees: false,
             days: {},
             total: 0
           };
         }
-
-        const mins = Number(row.hrs ?? row.hrs ?? 0);
-
-        // Only use DTR profile values when employee is not found in Employees sheet.
-        if (!map[key].fromEmployees) {
-          map[key].name = row.name || map[key].name;
-          map[key].department = row.dept || map[key].department;
-          map[key].position = row.pos || map[key].position;
-        }
-
+        const mins = Number(row.hrs ?? row.hrs ?? row.workMinutes ?? 0);
+        map[key].name = row.name || map[key].name;
+        map[key].department = row.dept || map[key].department;
+        map[key].position = row.pos || map[key].position;
         map[key].days[row.date] = (map[key].days[row.date] || 0) + mins;
         map[key].total += mins;
       });
@@ -1303,39 +1331,35 @@
     }
 
     function buildEmployeeQrUrl(code) {
-      return KIOSK_URL + "?view=employee&employee=" + encodeURIComponent(code);
+      const base = location.origin + location.pathname.replace(/index\.html$/i, "index.html");
+      return base + "?view=employee&employee=" + encodeURIComponent(code);
     }
 
-    async function previewQr(code) {
+    function previewQr(code) {
       const emp = employeeByCode(code);
       if (!emp) return;
-
       state.selectedQrEmployee = emp;
+      const qrUrl = buildEmployeeQrUrl(emp.code);
       document.getElementById("qrName").textContent = emp.name;
       document.getElementById("qrCodeText").textContent = "Code: " + emp.code;
-      document.getElementById("qrUrlText").textContent = "Fetching QR image from Google Drive...";
-
+      document.getElementById("qrUrlText").textContent = qrUrl;
       const box = document.getElementById("qrBox");
-      box.innerHTML = `<span style="color:#98a2b3;font-size:12px;">Loading from Drive...</span>`;
+      box.innerHTML = `<span style="color:#98a2b3;font-size:12px;">Generating...</span>`;
       state.currentQrDataUrl = "";
 
-      try {
-        const result = await jsonpRequest({
-          action: "getQR",
-          code: emp.code,
-          name: emp.name
-        });
-
-        if (!result.ok) throw new Error(result.error || "Could not fetch QR from Google Drive.");
-        if (!result.dataUrl) throw new Error("QR file was not returned from Google Drive.");
-
-        state.currentQrDataUrl = result.dataUrl;
-        box.innerHTML = `<img src="${result.dataUrl}" alt="QR Code" />`;
-        document.getElementById("qrUrlText").textContent = "Drive file: " + (result.fileName || "QR PNG");
-      } catch (err) {
-        box.innerHTML = `<span style="color:#dc2626;font-size:12px;">QR not found in Drive.</span>`;
-        document.getElementById("qrUrlText").textContent = err.message;
+      if (!window.QRCode) {
+        box.innerHTML = `<span style="color:#dc2626;font-size:12px;">QR library not loaded.</span>`;
+        return;
       }
+
+      createEmployeeQrDataUrl(emp.code, 160)
+        .then(url => {
+          state.currentQrDataUrl = url;
+          box.innerHTML = `<img src="${url}" alt="QR Code" />`;
+        })
+        .catch(() => {
+          box.innerHTML = `<span style="color:#dc2626;font-size:12px;">QR error.</span>`;
+        });
     }
 
     function editEmployee(code) {
@@ -1387,15 +1411,25 @@
           department,
           position,
           shift,
-          schedule
+          schedule,
+          skipQR: true
         });
 
         if (!result.ok) throw new Error(result.error || "Save failed.");
-        setMessage("employeeMessage", "Saved. QR file created in Employee QR Codes Drive folder: " + (result.qrFile || ""), "ok");
+
+        const qrDataUrl = await createEmployeeQrDataUrl(code, 300);
+        await postDataNoCors({
+          type: "saveQR",
+          employeeCode: code,
+          employeeName: name,
+          qrBase64: qrDataUrl
+        });
+
+        setMessage("employeeMessage", "Saved. QR sent to Employee QR Codes Drive folder.", "ok");
         await loadEmployees();
         populateFilters();
         renderReport();
-        await previewQr(code);
+        previewQr(code);
       } catch (err) {
         setMessage("employeeMessage", err.message, "err");
       }
@@ -1420,9 +1454,26 @@
     async function generateAllQrs() {
       setMessage("employeeMessage", "Generating QR codes for all employees...");
       try {
-        const result = await jsonpRequest({ action: "generateAllQRs" });
-        if (!result.ok) throw new Error(result.error || "QR generation failed.");
-        setMessage("employeeMessage", "Generated " + result.saved + " QR file(s) in Employee QR Codes Drive folder.", "ok");
+        if (!state.employees.length) {
+          await loadEmployees();
+        }
+
+        let count = 0;
+        for (const emp of state.employees) {
+          if (!emp.code || !emp.name) continue;
+          setMessage("employeeMessage", `Saving QR ${count + 1} of ${state.employees.length}: ${emp.name}`);
+          const qrDataUrl = await createEmployeeQrDataUrl(emp.code, 300);
+          await postDataNoCors({
+            type: "saveQR",
+            employeeCode: emp.code,
+            employeeName: emp.name,
+            qrBase64: qrDataUrl
+          });
+          count++;
+          await new Promise(resolve => setTimeout(resolve, 250));
+        }
+
+        setMessage("employeeMessage", "Generated " + count + " QR file(s) in Employee QR Codes Drive folder.", "ok");
       } catch (err) {
         setMessage("employeeMessage", err.message, "err");
       }
@@ -1436,14 +1487,14 @@
       }
       setMessage("employeeMessage", "Saving QR to Drive...");
       try {
-        const result = await sendData({
+        const qrDataUrl = state.currentQrDataUrl || await createEmployeeQrDataUrl(emp.code, 300);
+        await postDataNoCors({
           type: "saveQR",
           employeeCode: emp.code,
-          employeeName: emp.name
+          employeeName: emp.name,
+          qrBase64: qrDataUrl
         });
-        if (!result.ok) throw new Error(result.error || "Could not save QR.");
-        setMessage("employeeMessage", "QR saved to Drive: " + result.fileName, "ok");
-        await previewQr(emp.code);
+        setMessage("employeeMessage", "QR sent to Employee QR Codes Drive folder.", "ok");
       } catch (err) {
         setMessage("employeeMessage", err.message, "err");
       }
@@ -1496,7 +1547,9 @@
       const labels = {
         arrival: "Arrived",
         breakStart: "Break Start",
+        shortBreakStart: "Short Break Start",
         breakEnd: "Break End",
+        shortBreakEnd: "Short Break End",
         departure: "Departure"
       };
 
