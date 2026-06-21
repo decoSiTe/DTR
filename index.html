@@ -383,6 +383,8 @@
     .form-field { display: flex; flex-direction: column; gap: 5px; }
     .form-field label { font-size: 12px; font-weight: 700; }
     .form-field input, .form-field select {
+      width: 100%;
+      min-width: 0;
       height: 34px;
       border: 1px solid #d0d5dd;
       border-radius: 5px;
@@ -564,70 +566,83 @@
       background: #fbfbfc;
       padding: 10px;
       margin-top: 2px;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
     }
 
     .schedule-title-row {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       gap: 10px;
       margin-bottom: 8px;
+      flex-wrap: wrap;
     }
 
     .schedule-title-row strong {
       font-size: 12px;
+      flex: 0 0 auto;
     }
 
     .schedule-note {
       color: var(--muted);
       font-size: 11px;
       line-height: 1.35;
-      text-align: right;
+      text-align: left;
+      flex: 1 1 180px;
     }
 
     .schedule-grid {
       display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(86px, 1fr));
+      gap: 6px;
+      width: 100%;
     }
 
     .schedule-day {
       border: 1px solid var(--line);
       border-radius: 8px;
       background: white;
-      padding: 8px;
+      padding: 6px;
       min-width: 0;
+      overflow: hidden;
     }
 
     .day-check-row {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       font-weight: 700;
       font-size: 12px;
-      margin-bottom: 7px;
+      margin-bottom: 6px;
       white-space: nowrap;
     }
 
     .day-check-row input {
-      width: 15px;
-      height: 15px;
+      width: 14px;
+      height: 14px;
       margin: 0;
       accent-color: var(--purple);
+      flex: 0 0 auto;
     }
 
     .schedule-day select {
-      height: 30px;
-      font-size: 12px;
-      padding: 4px 6px;
+      width: 100%;
+      min-width: 0;
+      height: 29px;
+      font-size: 11px;
+      padding: 4px 4px;
     }
 
     .schedule-duty {
       margin-top: 6px;
       color: var(--muted);
-      font-size: 10.5px;
-      line-height: 1.25;
-      min-height: 27px;
+      font-size: 10px;
+      line-height: 1.2;
+      min-height: 36px;
+      white-space: normal;
+      overflow-wrap: anywhere;
     }
 
     .schedule-day.disabled {
@@ -660,7 +675,7 @@
 
     <main class="main">
       <div class="titlebar">
-        <div class="brand"><span class="brand-mark"></span><span id="pageTitle">Employees</span></div>
+        <div class="brand"><span class="brand-mark"></span><span id="pageTitle">Executors</span></div>
         <div class="top-actions">
           <button class="icon-btn" id="openDriveBtn" title="Employee QR Codes Drive folder">QR Drive</button>
           <button class="icon-btn" id="refreshBtn" title="Refresh report">⟳</button>
