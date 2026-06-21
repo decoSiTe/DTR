@@ -660,7 +660,7 @@
 
     <main class="main">
       <div class="titlebar">
-        <div class="brand"><span class="brand-mark"></span><span id="pageTitle">Executors</span></div>
+        <div class="brand"><span class="brand-mark"></span><span id="pageTitle">Employees</span></div>
         <div class="top-actions">
           <button class="icon-btn" id="openDriveBtn" title="Employee QR Codes Drive folder">QR Drive</button>
           <button class="icon-btn" id="refreshBtn" title="Refresh report">⟳</button>
@@ -757,7 +757,7 @@
                 <div class="schedule-editor">
                   <div class="schedule-title-row">
                     <strong>Schedule</strong>
-                    <div class="schedule-note">Tick working days from Monday to Sunday, then select 8 hours or 12 hours.</div>
+                    <div class="schedule-note">Tick working days from Monday to Sunday, then select 8 hrs or 12 hrs.</div>
                   </div>
                   <div id="scheduleGrid" class="schedule-grid"></div>
                 </div>
@@ -877,8 +877,8 @@
       };
     }
 
-    function dutyRange(shift, hours) {
-      const h = Number(hours) === 12 ? 12 : 8;
+    function dutyRange(shift, hrs) {
+      const h = Number(hrs) === 12 ? 12 : 8;
       if (shift === "afternoon") {
         return h === 12 ? "7:00 PM - 7:00 AM" : "7:00 PM - 4:00 AM";
       }
@@ -894,8 +894,8 @@
 
       document.querySelectorAll(".schedule-duty").forEach(el => {
         const day = el.dataset.day;
-        const dayState = scheduleState[day] || { active: false, hours: 8 };
-        el.textContent = dayState.active ? dutyRange(shift, dayState.hours) : "Day off";
+        const dayState = scheduleState[day] || { active: false, hrs: 8 };
+        el.textContent = dayState.active ? dutyRange(shift, dayState.hrs) : "Day off";
       });
     }
 
@@ -904,7 +904,7 @@
       if (!grid) return;
       const shift = document.getElementById("empShift")?.value || "morning";
       grid.innerHTML = scheduleDays.map(day => {
-        const d = scheduleState[day.key] || { active: false, hours: 8 };
+        const d = scheduleState[day.key] || { active: false, hrs: 8 };
         const disabled = d.active ? "" : "disabled";
         return `
           <div class="schedule-day ${disabled}">
@@ -912,32 +912,32 @@
               <input type="checkbox" ${d.active ? "checked" : ""} onchange="toggleScheduleDay('${day.key}', this.checked)">
               <span>${day.label}</span>
             </label>
-            <select onchange="setScheduleHours('${day.key}', this.value)" ${d.active ? "" : "disabled"}>
-              <option value="8" ${Number(d.hours) === 8 ? "selected" : ""}>8 hours</option>
-              <option value="12" ${Number(d.hours) === 12 ? "selected" : ""}>12 hours</option>
+            <select onchange="setSchedulehrs('${day.key}', this.value)" ${d.active ? "" : "disabled"}>
+              <option value="8" ${Number(d.hrs) === 8 ? "selected" : ""}>8 hrs</option>
+              <option value="12" ${Number(d.hrs) === 12 ? "selected" : ""}>12 hrs</option>
             </select>
-            <div class="schedule-duty" data-day="${day.key}">${d.active ? dutyRange(shift, d.hours) : "Day off"}</div>
+            <div class="schedule-duty" data-day="${day.key}">${d.active ? dutyRange(shift, d.hrs) : "Day off"}</div>
           </div>`;
       }).join("");
       updateDutySummary();
     }
 
     function toggleScheduleDay(day, checked) {
-      if (!scheduleState[day]) scheduleState[day] = { active: false, hours: 8 };
+      if (!scheduleState[day]) scheduleState[day] = { active: false, hrs: 8 };
       scheduleState[day].active = !!checked;
       renderScheduleEditor();
     }
 
-    function setScheduleHours(day, value) {
-      if (!scheduleState[day]) scheduleState[day] = { active: true, hours: 8 };
-      scheduleState[day].hours = Number(value) === 12 ? 12 : 8;
+    function setSchedulehrs(day, value) {
+      if (!scheduleState[day]) scheduleState[day] = { active: true, hrs: 8 };
+      scheduleState[day].hrs = Number(value) === 12 ? 12 : 8;
       updateDutySummary();
     }
 
     function buildScheduleString() {
       return scheduleDays
         .filter(day => scheduleState[day.key] && scheduleState[day.key].active)
-        .map(day => `${day.key}:${Number(scheduleState[day.key].hours) === 12 ? 12 : 8}hrs`)
+        .map(day => `${day.key}:${Number(scheduleState[day.key].hrs) === 12 ? 12 : 8}hrs`)
         .join(", ");
     }
 
@@ -950,7 +950,7 @@
         if (!match) return;
         const key = scheduleDays.find(d => d.key.toLowerCase() === match[1].toLowerCase())?.key;
         if (!key) return;
-        parsed[key] = { active: true, hours: Number(match[2]) };
+        parsed[key] = { active: true, hrs: Number(match[2]) };
       });
 
       if (!schedule || !schedule.trim()) return defaultScheduleState();
@@ -1001,7 +1001,7 @@
 
     function currentTime() {
       const d = new Date();
-      return pad(d.getHours()) + ":" + pad(d.getMinutes());
+      return pad(d.gethrs()) + ":" + pad(d.getMinutes());
     }
 
     function setMessage(id, message, type) {
@@ -1196,7 +1196,7 @@
             total: 0
           };
         }
-        const mins = Number(row.hours || 0);
+        const mins = Number(row.hrs || 0);
         map[key].name = row.name || map[key].name;
         map[key].department = row.dept || map[key].department;
         map[key].position = row.pos || map[key].position;
