@@ -517,12 +517,97 @@
       .cards { grid-template-columns: 1fr; }
     }
 
+
+
+    .schedule-editor {
+      grid-column: 1 / -1;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfbfc;
+      padding: 10px;
+      margin-top: 2px;
+    }
+
+    .schedule-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .schedule-title-row strong {
+      font-size: 12px;
+    }
+
+    .schedule-note {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+      text-align: right;
+    }
+
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .schedule-day {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      padding: 8px;
+      min-width: 0;
+    }
+
+    .day-check-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      font-size: 12px;
+      margin-bottom: 7px;
+      white-space: nowrap;
+    }
+
+    .day-check-row input {
+      width: 15px;
+      height: 15px;
+      margin: 0;
+      accent-color: var(--purple);
+    }
+
+    .schedule-day select {
+      height: 30px;
+      font-size: 12px;
+      padding: 4px 6px;
+    }
+
+    .schedule-duty {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.25;
+      min-height: 27px;
+    }
+
+    .schedule-day.disabled {
+      background: #f4f4f5;
+      color: var(--muted);
+    }
+
+    .schedule-day.disabled select {
+      opacity: 0.55;
+    }
+
     @media (max-width: 700px) {
       .app { grid-template-columns: 42px 1fr; }
       .filters { grid-template-columns: 1fr 1fr; }
       .range-btn { display: none; }
       .month-year, .field.wide { grid-column: span 2; }
       .action-grid { grid-template-columns: 1fr; }
+      .schedule-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
   </style>
 </head>
@@ -623,13 +708,20 @@
                 <div class="form-field">
                   <label for="empShift">Shift</label>
                   <select id="empShift">
-                    <option value="morning">morning</option>
-                    <option value="afternoon">afternoon</option>
+                    <option value="morning">Morning</option>
+                    <option value="afternoon">Afternoon</option>
                   </select>
                 </div>
                 <div class="form-field">
-                  <label for="empSchedule">Schedule</label>
-                  <input id="empSchedule" placeholder="M:8hrs, T:8hrs, W:8hrs" />
+                  <label>Duty time</label>
+                  <input id="dutySummary" readonly value="Morning: 8hrs 7:00 AM - 4:00 PM / 12hrs 7:00 AM - 7:00 PM" />
+                </div>
+                <div class="schedule-editor">
+                  <div class="schedule-title-row">
+                    <strong>Schedule</strong>
+                    <div class="schedule-note">Tick working days from Monday to Sunday, then select 8 hours or 12 hours.</div>
+                  </div>
+                  <div id="scheduleGrid" class="schedule-grid"></div>
                 </div>
               </div>
 
@@ -721,6 +813,111 @@
       "Jan", "Feb", "Mar", "Apr", "May", "Jun",
       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     ];
+
+
+    const scheduleDays = [
+      { key: "M", label: "Mon" },
+      { key: "T", label: "Tue" },
+      { key: "W", label: "Wed" },
+      { key: "TH", label: "Thu" },
+      { key: "F", label: "Fri" },
+      { key: "Sa", label: "Sat" },
+      { key: "Su", label: "Sun" }
+    ];
+
+    let scheduleState = defaultScheduleState();
+
+    function defaultScheduleState() {
+      return {
+        M:  { active: true,  hours: 8 },
+        T:  { active: true,  hours: 8 },
+        W:  { active: true,  hours: 8 },
+        TH: { active: true,  hours: 8 },
+        F:  { active: true,  hours: 8 },
+        Sa: { active: false, hours: 8 },
+        Su: { active: false, hours: 8 }
+      };
+    }
+
+    function dutyRange(shift, hours) {
+      const h = Number(hours) === 12 ? 12 : 8;
+      if (shift === "afternoon") {
+        return h === 12 ? "7:00 PM - 7:00 AM" : "7:00 PM - 4:00 AM";
+      }
+      return h === 12 ? "7:00 AM - 7:00 PM" : "7:00 AM - 4:00 PM";
+    }
+
+    function updateDutySummary() {
+      const shift = document.getElementById("empShift")?.value || "morning";
+      const label = shift === "afternoon" ? "Afternoon" : "Morning";
+      const summary = `${label}: 8hrs ${dutyRange(shift, 8)} / 12hrs ${dutyRange(shift, 12)}`;
+      const input = document.getElementById("dutySummary");
+      if (input) input.value = summary;
+
+      document.querySelectorAll(".schedule-duty").forEach(el => {
+        const day = el.dataset.day;
+        const dayState = scheduleState[day] || { active: false, hours: 8 };
+        el.textContent = dayState.active ? dutyRange(shift, dayState.hours) : "Day off";
+      });
+    }
+
+    function renderScheduleEditor() {
+      const grid = document.getElementById("scheduleGrid");
+      if (!grid) return;
+      const shift = document.getElementById("empShift")?.value || "morning";
+      grid.innerHTML = scheduleDays.map(day => {
+        const d = scheduleState[day.key] || { active: false, hours: 8 };
+        const disabled = d.active ? "" : "disabled";
+        return `
+          <div class="schedule-day ${disabled}">
+            <label class="day-check-row">
+              <input type="checkbox" ${d.active ? "checked" : ""} onchange="toggleScheduleDay('${day.key}', this.checked)">
+              <span>${day.label}</span>
+            </label>
+            <select onchange="setScheduleHours('${day.key}', this.value)" ${d.active ? "" : "disabled"}>
+              <option value="8" ${Number(d.hours) === 8 ? "selected" : ""}>8 hours</option>
+              <option value="12" ${Number(d.hours) === 12 ? "selected" : ""}>12 hours</option>
+            </select>
+            <div class="schedule-duty" data-day="${day.key}">${d.active ? dutyRange(shift, d.hours) : "Day off"}</div>
+          </div>`;
+      }).join("");
+      updateDutySummary();
+    }
+
+    function toggleScheduleDay(day, checked) {
+      if (!scheduleState[day]) scheduleState[day] = { active: false, hours: 8 };
+      scheduleState[day].active = !!checked;
+      renderScheduleEditor();
+    }
+
+    function setScheduleHours(day, value) {
+      if (!scheduleState[day]) scheduleState[day] = { active: true, hours: 8 };
+      scheduleState[day].hours = Number(value) === 12 ? 12 : 8;
+      updateDutySummary();
+    }
+
+    function buildScheduleString() {
+      return scheduleDays
+        .filter(day => scheduleState[day.key] && scheduleState[day.key].active)
+        .map(day => `${day.key}:${Number(scheduleState[day.key].hours) === 12 ? 12 : 8}hrs`)
+        .join(", ");
+    }
+
+    function parseScheduleString(schedule) {
+      const parsed = defaultScheduleState();
+      Object.keys(parsed).forEach(day => parsed[day].active = false);
+
+      String(schedule || "").split(",").forEach(part => {
+        const match = part.trim().match(/^(M|T|W|TH|F|Sa|Su)\s*:\s*(8|12)\s*hrs?/i);
+        if (!match) return;
+        const key = scheduleDays.find(d => d.key.toLowerCase() === match[1].toLowerCase())?.key;
+        if (!key) return;
+        parsed[key] = { active: true, hours: Number(match[2]) };
+      });
+
+      if (!schedule || !schedule.trim()) return defaultScheduleState();
+      return parsed;
+    }
 
     function pad(n) { return String(n).padStart(2, "0"); }
 
@@ -1088,14 +1285,17 @@
       document.getElementById("empDepartment").value = emp.department || "";
       document.getElementById("empPosition").value = emp.position || "";
       document.getElementById("empShift").value = emp.shift || "morning";
-      document.getElementById("empSchedule").value = emp.schedule || "";
+      scheduleState = parseScheduleString(emp.schedule || "");
+      renderScheduleEditor();
       previewQr(code);
       setMessage("employeeMessage", "Employee loaded for editing.");
     }
 
     function clearEmployeeForm() {
-      ["empCode", "empName", "empDepartment", "empPosition", "empSchedule"].forEach(id => document.getElementById(id).value = "");
+      ["empCode", "empName", "empDepartment", "empPosition"].forEach(id => document.getElementById(id).value = "");
       document.getElementById("empShift").value = "morning";
+      scheduleState = defaultScheduleState();
+      renderScheduleEditor();
       setMessage("employeeMessage", "Ready.");
     }
 
@@ -1105,10 +1305,15 @@
       const department = document.getElementById("empDepartment").value.trim();
       const position = document.getElementById("empPosition").value.trim();
       const shift = document.getElementById("empShift").value;
-      const schedule = document.getElementById("empSchedule").value.trim();
+      const schedule = buildScheduleString();
 
       if (!code || !name) {
         setMessage("employeeMessage", "Employee code and name are required.", "err");
+        return;
+      }
+
+      if (!schedule) {
+        setMessage("employeeMessage", "Please tick at least one working day in the schedule.", "err");
         return;
       }
 
@@ -1319,6 +1524,7 @@
       document.getElementById("generateAllQrBtn").addEventListener("click", generateAllQrs);
       document.getElementById("downloadQrBtn").addEventListener("click", downloadSelectedQr);
       document.getElementById("saveQrBtn").addEventListener("click", saveSelectedQrToDrive);
+      document.getElementById("empShift").addEventListener("change", updateDutySummary);
 
       document.getElementById("kioskCode").addEventListener("input", renderKioskEmployee);
       document.querySelectorAll(".action-btn").forEach(btn => {
@@ -1329,6 +1535,7 @@
     window.addEventListener("DOMContentLoaded", () => {
       setupMonthOptions();
       setDefaultDates();
+      renderScheduleEditor();
       attachEvents();
       refreshAll();
     });
