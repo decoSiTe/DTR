@@ -268,50 +268,12 @@
     tbody tr:nth-child(even) td { background: var(--row-alt); }
     tbody tr:hover td { background: #eef5ff; }
 
-    .col-num { width: 48px; min-width: 48px; text-align: center; color: #111; }
-    .col-name { width: 220px; min-width: 220px; max-width: 260px; }
+    .col-num { width: 48px; text-align: center; color: #111; }
+    .col-name { min-width: 220px; max-width: 260px; }
     .col-dept { min-width: 145px; max-width: 170px; }
     .col-pos { min-width: 165px; max-width: 210px; }
     .col-total { min-width: 95px; font-weight: 700; }
     .date-col { min-width: 102px; text-align: center; }
-
-
-    /* Freeze # and Name columns when scrolling horizontally */
-    #reportTable th.col-num,
-    #reportTable td.col-num {
-      position: sticky;
-      left: 0;
-      z-index: 6;
-    }
-
-    #reportTable th.col-name,
-    #reportTable td.col-name {
-      position: sticky;
-      left: 48px;
-      z-index: 6;
-      box-shadow: 2px 0 0 var(--line-soft);
-    }
-
-    #reportTable thead th.col-num,
-    #reportTable thead th.col-name {
-      z-index: 12;
-      background: var(--header);
-    }
-
-    #reportTable tbody td.col-num,
-    #reportTable tbody td.col-name {
-      background: #fff;
-    }
-
-    #reportTable tbody tr:nth-child(even) td.col-num,
-    #reportTable tbody tr:nth-child(even) td.col-name {
-      background: var(--row-alt);
-    }
-
-    #reportTable tbody tr:hover td.col-num,
-    #reportTable tbody tr:hover td.col-name {
-      background: #eef5ff;
-    }
 
     .truncate {
       overflow: hidden;
@@ -383,8 +345,6 @@
     .form-field { display: flex; flex-direction: column; gap: 5px; }
     .form-field label { font-size: 12px; font-weight: 700; }
     .form-field input, .form-field select {
-      width: 100%;
-      min-width: 0;
       height: 34px;
       border: 1px solid #d0d5dd;
       border-radius: 5px;
@@ -557,110 +517,12 @@
       .cards { grid-template-columns: 1fr; }
     }
 
-
-
-    .schedule-editor {
-      grid-column: 1 / -1;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fbfbfc;
-      padding: 10px;
-      margin-top: 2px;
-      width: 100%;
-      max-width: 100%;
-      overflow: hidden;
-    }
-
-    .schedule-title-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 10px;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-    }
-
-    .schedule-title-row strong {
-      font-size: 12px;
-      flex: 0 0 auto;
-    }
-
-    .schedule-note {
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.35;
-      text-align: left;
-      flex: 1 1 180px;
-    }
-
-    .schedule-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(86px, 1fr));
-      gap: 6px;
-      width: 100%;
-    }
-
-    .schedule-day {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: white;
-      padding: 6px;
-      min-width: 0;
-      overflow: hidden;
-    }
-
-    .day-check-row {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-weight: 700;
-      font-size: 12px;
-      margin-bottom: 6px;
-      white-space: nowrap;
-    }
-
-    .day-check-row input {
-      width: 14px;
-      height: 14px;
-      margin: 0;
-      accent-color: var(--purple);
-      flex: 0 0 auto;
-    }
-
-    .schedule-day select {
-      width: 100%;
-      min-width: 0;
-      height: 29px;
-      font-size: 11px;
-      padding: 4px 4px;
-    }
-
-    .schedule-duty {
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 10px;
-      line-height: 1.2;
-      min-height: 36px;
-      white-space: normal;
-      overflow-wrap: anywhere;
-    }
-
-    .schedule-day.disabled {
-      background: #f4f4f5;
-      color: var(--muted);
-    }
-
-    .schedule-day.disabled select {
-      opacity: 0.55;
-    }
-
     @media (max-width: 700px) {
       .app { grid-template-columns: 42px 1fr; }
       .filters { grid-template-columns: 1fr 1fr; }
       .range-btn { display: none; }
       .month-year, .field.wide { grid-column: span 2; }
       .action-grid { grid-template-columns: 1fr; }
-      .schedule-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
   </style>
 </head>
@@ -761,20 +623,13 @@
                 <div class="form-field">
                   <label for="empShift">Shift</label>
                   <select id="empShift">
-                    <option value="morning">Morning</option>
-                    <option value="afternoon">Afternoon</option>
+                    <option value="morning">morning</option>
+                    <option value="afternoon">afternoon</option>
                   </select>
                 </div>
                 <div class="form-field">
-                  <label>Duty time</label>
-                  <input id="dutySummary" readonly value="Morning: 8hrs 7:00 AM - 4:00 PM / 12hrs 7:00 AM - 7:00 PM" />
-                </div>
-                <div class="schedule-editor">
-                  <div class="schedule-title-row">
-                    <strong>Schedule</strong>
-                    <div class="schedule-note">Tick working days from Monday to Sunday, then select 8 hrs or 12 hours.</div>
-                  </div>
-                  <div id="scheduleGrid" class="schedule-grid"></div>
+                  <label for="empSchedule">Schedule</label>
+                  <input id="empSchedule" placeholder="M:8hrs, T:8hrs, W:8hrs" />
                 </div>
               </div>
 
@@ -853,6 +708,7 @@
   <script>
     const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec";
     const QR_DRIVE_URL = "https://drive.google.com/drive/u/0/folders/1-y4dtzfTNQnF1Mj8RuJdWxhAY7ewLHSy";
+    const KIOSK_URL = "https://decosite.github.io/kioskdtr/index.html";
 
     const state = {
       employees: [],
@@ -866,111 +722,6 @@
       "Jan", "Feb", "Mar", "Apr", "May", "Jun",
       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     ];
-
-
-    const scheduleDays = [
-      { key: "M", label: "Mon" },
-      { key: "T", label: "Tue" },
-      { key: "W", label: "Wed" },
-      { key: "TH", label: "Thu" },
-      { key: "F", label: "Fri" },
-      { key: "Sa", label: "Sat" },
-      { key: "Su", label: "Sun" }
-    ];
-
-    let scheduleState = defaultScheduleState();
-
-    function defaultScheduleState() {
-      return {
-        M:  { active: true,  hours: 8 },
-        T:  { active: true,  hours: 8 },
-        W:  { active: true,  hours: 8 },
-        TH: { active: true,  hours: 8 },
-        F:  { active: true,  hours: 8 },
-        Sa: { active: false, hours: 8 },
-        Su: { active: false, hours: 8 }
-      };
-    }
-
-    function dutyRange(shift, hours) {
-      const h = Number(hours) === 12 ? 12 : 8;
-      if (shift === "afternoon") {
-        return h === 12 ? "7:00 PM - 7:00 AM" : "7:00 PM - 4:00 AM";
-      }
-      return h === 12 ? "7:00 AM - 7:00 PM" : "7:00 AM - 4:00 PM";
-    }
-
-    function updateDutySummary() {
-      const shift = document.getElementById("empShift")?.value || "morning";
-      const label = shift === "afternoon" ? "Afternoon" : "Morning";
-      const summary = `${label}: 8hrs ${dutyRange(shift, 8)} / 12hrs ${dutyRange(shift, 12)}`;
-      const input = document.getElementById("dutySummary");
-      if (input) input.value = summary;
-
-      document.querySelectorAll(".schedule-duty").forEach(el => {
-        const day = el.dataset.day;
-        const dayState = scheduleState[day] || { active: false, hours: 8 };
-        el.textContent = dayState.active ? dutyRange(shift, dayState.hours) : "Day off";
-      });
-    }
-
-    function renderScheduleEditor() {
-      const grid = document.getElementById("scheduleGrid");
-      if (!grid) return;
-      const shift = document.getElementById("empShift")?.value || "morning";
-      grid.innerHTML = scheduleDays.map(day => {
-        const d = scheduleState[day.key] || { active: false, hours: 8 };
-        const disabled = d.active ? "" : "disabled";
-        return `
-          <div class="schedule-day ${disabled}">
-            <label class="day-check-row">
-              <input type="checkbox" ${d.active ? "checked" : ""} onchange="toggleScheduleDay('${day.key}', this.checked)">
-              <span>${day.label}</span>
-            </label>
-            <select onchange="setScheduleHours('${day.key}', this.value)" ${d.active ? "" : "disabled"}>
-              <option value="8" ${Number(d.hours) === 8 ? "selected" : ""}>8 hours</option>
-              <option value="12" ${Number(d.hours) === 12 ? "selected" : ""}>12 hours</option>
-            </select>
-            <div class="schedule-duty" data-day="${day.key}">${d.active ? dutyRange(shift, d.hours) : "Day off"}</div>
-          </div>`;
-      }).join("");
-      updateDutySummary();
-    }
-
-    function toggleScheduleDay(day, checked) {
-      if (!scheduleState[day]) scheduleState[day] = { active: false, hours: 8 };
-      scheduleState[day].active = !!checked;
-      renderScheduleEditor();
-    }
-
-    function setScheduleHours(day, value) {
-      if (!scheduleState[day]) scheduleState[day] = { active: true, hours: 8 };
-      scheduleState[day].hours = Number(value) === 12 ? 12 : 8;
-      updateDutySummary();
-    }
-
-    function buildScheduleString() {
-      return scheduleDays
-        .filter(day => scheduleState[day.key] && scheduleState[day.key].active)
-        .map(day => `${day.key}:${Number(scheduleState[day.key].hours) === 12 ? 12 : 8}hrs`)
-        .join(", ");
-    }
-
-    function parseScheduleString(schedule) {
-      const parsed = defaultScheduleState();
-      Object.keys(parsed).forEach(day => parsed[day].active = false);
-
-      String(schedule || "").split(",").forEach(part => {
-        const match = part.trim().match(/^(M|T|W|TH|F|Sa|Su)\s*:\s*(8|12)\s*hrs?/i);
-        if (!match) return;
-        const key = scheduleDays.find(d => d.key.toLowerCase() === match[1].toLowerCase())?.key;
-        if (!key) return;
-        parsed[key] = { active: true, hours: Number(match[2]) };
-      });
-
-      if (!schedule || !schedule.trim()) return defaultScheduleState();
-      return parsed;
-    }
 
     function pad(n) { return String(n).padStart(2, "0"); }
 
@@ -1063,36 +814,6 @@
 
     function sendData(payload) {
       return jsonpRequest({ data: JSON.stringify(payload) });
-    }
-
-    async function postDataNoCors(payload) {
-      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
-        throw new Error("Apps Script URL is not configured.");
-      }
-
-      await fetch(GOOGLE_SHEET_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      });
-
-      // no-cors cannot read the Apps Script response, but the request reaches Apps Script.
-      return { ok: true };
-    }
-
-    function createEmployeeQrDataUrl(code, width = 300) {
-      return new Promise((resolve, reject) => {
-        if (!window.QRCode) {
-          reject(new Error("QR library not loaded."));
-          return;
-        }
-
-        const qrUrl = buildEmployeeQrUrl(code);
-        QRCode.toDataURL(qrUrl, { width, margin: 2 }, function (err, url) {
-          if (err) reject(err); else resolve(url);
-        });
-      });
     }
 
     function setupMonthOptions() {
@@ -1329,8 +1050,7 @@
     }
 
     function buildEmployeeQrUrl(code) {
-      const base = location.origin + location.pathname.replace(/index\.html$/i, "index.html");
-      return base + "?view=employee&employee=" + encodeURIComponent(code);
+      return KIOSK_URL + "?view=employee&employee=" + encodeURIComponent(code);
     }
 
     function previewQr(code) {
@@ -1350,14 +1070,14 @@
         return;
       }
 
-      createEmployeeQrDataUrl(emp.code, 160)
-        .then(url => {
-          state.currentQrDataUrl = url;
-          box.innerHTML = `<img src="${url}" alt="QR Code" />`;
-        })
-        .catch(() => {
+      QRCode.toDataURL(qrUrl, { width: 160, margin: 2 }, function (err, url) {
+        if (err) {
           box.innerHTML = `<span style="color:#dc2626;font-size:12px;">QR error.</span>`;
-        });
+          return;
+        }
+        state.currentQrDataUrl = url;
+        box.innerHTML = `<img src="${url}" alt="QR Code" />`;
+      });
     }
 
     function editEmployee(code) {
@@ -1368,17 +1088,14 @@
       document.getElementById("empDepartment").value = emp.department || "";
       document.getElementById("empPosition").value = emp.position || "";
       document.getElementById("empShift").value = emp.shift || "morning";
-      scheduleState = parseScheduleString(emp.schedule || "");
-      renderScheduleEditor();
+      document.getElementById("empSchedule").value = emp.schedule || "";
       previewQr(code);
       setMessage("employeeMessage", "Employee loaded for editing.");
     }
 
     function clearEmployeeForm() {
-      ["empCode", "empName", "empDepartment", "empPosition"].forEach(id => document.getElementById(id).value = "");
+      ["empCode", "empName", "empDepartment", "empPosition", "empSchedule"].forEach(id => document.getElementById(id).value = "");
       document.getElementById("empShift").value = "morning";
-      scheduleState = defaultScheduleState();
-      renderScheduleEditor();
       setMessage("employeeMessage", "Ready.");
     }
 
@@ -1388,15 +1105,10 @@
       const department = document.getElementById("empDepartment").value.trim();
       const position = document.getElementById("empPosition").value.trim();
       const shift = document.getElementById("empShift").value;
-      const schedule = buildScheduleString();
+      const schedule = document.getElementById("empSchedule").value.trim();
 
       if (!code || !name) {
         setMessage("employeeMessage", "Employee code and name are required.", "err");
-        return;
-      }
-
-      if (!schedule) {
-        setMessage("employeeMessage", "Please tick at least one working day in the schedule.", "err");
         return;
       }
 
@@ -1409,21 +1121,11 @@
           department,
           position,
           shift,
-          schedule,
-          skipQR: true
+          schedule
         });
 
         if (!result.ok) throw new Error(result.error || "Save failed.");
-
-        const qrDataUrl = await createEmployeeQrDataUrl(code, 300);
-        await postDataNoCors({
-          type: "saveQR",
-          employeeCode: code,
-          employeeName: name,
-          qrBase64: qrDataUrl
-        });
-
-        setMessage("employeeMessage", "Saved. QR sent to Employee QR Codes Drive folder.", "ok");
+        setMessage("employeeMessage", "Saved. QR file created in Employee QR Codes Drive folder: " + (result.qrFile || ""), "ok");
         await loadEmployees();
         populateFilters();
         renderReport();
@@ -1452,26 +1154,9 @@
     async function generateAllQrs() {
       setMessage("employeeMessage", "Generating QR codes for all employees...");
       try {
-        if (!state.employees.length) {
-          await loadEmployees();
-        }
-
-        let count = 0;
-        for (const emp of state.employees) {
-          if (!emp.code || !emp.name) continue;
-          setMessage("employeeMessage", `Saving QR ${count + 1} of ${state.employees.length}: ${emp.name}`);
-          const qrDataUrl = await createEmployeeQrDataUrl(emp.code, 300);
-          await postDataNoCors({
-            type: "saveQR",
-            employeeCode: emp.code,
-            employeeName: emp.name,
-            qrBase64: qrDataUrl
-          });
-          count++;
-          await new Promise(resolve => setTimeout(resolve, 250));
-        }
-
-        setMessage("employeeMessage", "Generated " + count + " QR file(s) in Employee QR Codes Drive folder.", "ok");
+        const result = await jsonpRequest({ action: "generateAllQRs" });
+        if (!result.ok) throw new Error(result.error || "QR generation failed.");
+        setMessage("employeeMessage", "Generated " + result.saved + " QR file(s) in Employee QR Codes Drive folder.", "ok");
       } catch (err) {
         setMessage("employeeMessage", err.message, "err");
       }
@@ -1485,14 +1170,13 @@
       }
       setMessage("employeeMessage", "Saving QR to Drive...");
       try {
-        const qrDataUrl = state.currentQrDataUrl || await createEmployeeQrDataUrl(emp.code, 300);
-        await postDataNoCors({
+        const result = await sendData({
           type: "saveQR",
           employeeCode: emp.code,
-          employeeName: emp.name,
-          qrBase64: qrDataUrl
+          employeeName: emp.name
         });
-        setMessage("employeeMessage", "QR sent to Employee QR Codes Drive folder.", "ok");
+        if (!result.ok) throw new Error(result.error || "Could not save QR.");
+        setMessage("employeeMessage", "QR saved to Drive: " + result.fileName, "ok");
       } catch (err) {
         setMessage("employeeMessage", err.message, "err");
       }
@@ -1635,7 +1319,6 @@
       document.getElementById("generateAllQrBtn").addEventListener("click", generateAllQrs);
       document.getElementById("downloadQrBtn").addEventListener("click", downloadSelectedQr);
       document.getElementById("saveQrBtn").addEventListener("click", saveSelectedQrToDrive);
-      document.getElementById("empShift").addEventListener("change", updateDutySummary);
 
       document.getElementById("kioskCode").addEventListener("input", renderKioskEmployee);
       document.querySelectorAll(".action-btn").forEach(btn => {
@@ -1646,7 +1329,6 @@
     window.addEventListener("DOMContentLoaded", () => {
       setupMonthOptions();
       setDefaultDates();
-      renderScheduleEditor();
       attachEvents();
       refreshAll();
     });
