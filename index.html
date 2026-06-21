@@ -1210,7 +1210,7 @@
           };
         }
 
-        const mins = Number(row.hrs || 0);
+        const mins = Number(row.hrs ?? row.hrs ?? 0);
 
         // Only use DTR profile values when employee is not found in Employees sheet.
         if (!map[key].fromEmployees) {
