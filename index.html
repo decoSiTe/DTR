@@ -314,6 +314,29 @@
       align-items: start;
     }
 
+    /* Employee QR page: keep the form fixed while the Employees table scrolls */
+    #employeesView .panel {
+      overflow: hidden;
+    }
+
+    #employeesView .cards {
+      height: calc(100vh - 68px);
+      align-items: stretch;
+    }
+
+    #employeesView .cards > .card:first-child {
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    #employeesView .cards > .card:nth-child(2) {
+      height: 100%;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
     .card {
       border: 1px solid var(--line);
       background: #fff;
@@ -398,6 +421,12 @@
       overflow: auto;
       max-height: 580px;
       background: #fff;
+    }
+
+    #employeesView .employee-table-wrap {
+      flex: 1;
+      min-height: 0;
+      max-height: none;
     }
 
     .small-table {
@@ -524,7 +553,7 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       background: #fbfbfc;
-      padding: 10px;
+      padding: 8px;
       margin-top: 2px;
       width: 100%;
       max-width: 100%;
@@ -535,9 +564,9 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 10px;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 7px;
+      flex-wrap: nowrap;
     }
 
     .schedule-title-row strong {
@@ -547,16 +576,16 @@
 
     .schedule-note {
       color: var(--muted);
-      font-size: 11px;
-      line-height: 1.35;
-      text-align: left;
-      flex: 1 1 180px;
+      font-size: 10.5px;
+      line-height: 1.25;
+      text-align: right;
+      flex: 1 1 auto;
     }
 
     .schedule-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
       width: 100%;
     }
 
@@ -564,7 +593,7 @@
       border: 1px solid var(--line);
       border-radius: 8px;
       background: white;
-      padding: 8px;
+      padding: 6px;
       min-width: 0;
       overflow: hidden;
     }
@@ -572,16 +601,16 @@
     .day-check-row {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       font-weight: 700;
-      font-size: 12px;
-      margin-bottom: 7px;
+      font-size: 11.5px;
+      margin-bottom: 5px;
       white-space: nowrap;
     }
 
     .day-check-row input {
-      width: 15px;
-      height: 15px;
+      width: 13px;
+      height: 13px;
       margin: 0;
       accent-color: var(--purple);
       flex: 0 0 auto;
@@ -591,18 +620,18 @@
       width: 100%;
       max-width: 100%;
       min-width: 0;
-      height: 30px;
+      height: 27px;
       font-size: 11px;
-      padding: 4px 4px;
+      padding: 3px 4px;
       display: block;
     }
 
     .schedule-duty {
-      margin-top: 6px;
+      margin-top: 5px;
       color: var(--muted);
-      font-size: 10.5px;
-      line-height: 1.25;
-      min-height: 40px;
+      font-size: 10px;
+      line-height: 1.2;
+      min-height: 32px;
       white-space: normal;
       overflow-wrap: anywhere;
     }
@@ -623,6 +652,8 @@
       .month-year, .field.wide { grid-column: span 2; }
       .action-grid { grid-template-columns: 1fr; }
       .schedule-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #employeesView .panel { overflow: auto; }
+      #employeesView .cards { height: auto; }
     }
   </style>
 </head>
