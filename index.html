@@ -268,12 +268,50 @@
     tbody tr:nth-child(even) td { background: var(--row-alt); }
     tbody tr:hover td { background: #eef5ff; }
 
-    .col-num { width: 48px; text-align: center; color: #111; }
-    .col-name { min-width: 220px; max-width: 260px; }
+    .col-num { width: 48px; min-width: 48px; text-align: center; color: #111; }
+    .col-name { width: 220px; min-width: 220px; max-width: 260px; }
     .col-dept { min-width: 145px; max-width: 170px; }
     .col-pos { min-width: 165px; max-width: 210px; }
     .col-total { min-width: 95px; font-weight: 700; }
     .date-col { min-width: 102px; text-align: center; }
+
+
+    /* Freeze # and Name columns when scrolling horizontally */
+    #reportTable th.col-num,
+    #reportTable td.col-num {
+      position: sticky;
+      left: 0;
+      z-index: 6;
+    }
+
+    #reportTable th.col-name,
+    #reportTable td.col-name {
+      position: sticky;
+      left: 48px;
+      z-index: 6;
+      box-shadow: 2px 0 0 var(--line-soft);
+    }
+
+    #reportTable thead th.col-num,
+    #reportTable thead th.col-name {
+      z-index: 12;
+      background: var(--header);
+    }
+
+    #reportTable tbody td.col-num,
+    #reportTable tbody td.col-name {
+      background: #fff;
+    }
+
+    #reportTable tbody tr:nth-child(even) td.col-num,
+    #reportTable tbody tr:nth-child(even) td.col-name {
+      background: var(--row-alt);
+    }
+
+    #reportTable tbody tr:hover td.col-num,
+    #reportTable tbody tr:hover td.col-name {
+      background: #eef5ff;
+    }
 
     .truncate {
       overflow: hidden;
@@ -830,7 +868,7 @@
     function defaultScheduleState() {
       return {
         M:  { active: true,  hrs: 8 },
-        T:  { active: true,  h: 8 },
+        T:  { active: true,  hrs: 8 },
         W:  { active: true,  hrs: 8 },
         TH: { active: true,  hrs: 8 },
         F:  { active: true,  hrs: 8 },
