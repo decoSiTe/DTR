@@ -538,6 +538,104 @@
       color: var(--muted);
     }
 
+
+
+    .records-shell {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+    }
+
+    .records-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line-soft);
+      background: #fff;
+    }
+
+    .records-search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 280px;
+      max-width: 520px;
+      flex: 1;
+    }
+
+    .records-search-wrap label {
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .records-search-wrap input {
+      width: 100%;
+      height: 30px;
+      border: 1px solid #d0d5dd;
+      border-radius: 5px;
+      padding: 5px 9px;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    .records-count {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .records-table-wrap {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 0 7px 8px 7px;
+      background: #fff;
+    }
+
+    .records-table {
+      min-width: 1180px;
+      width: 100%;
+      font-size: 12px;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .records-table th {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      height: 30px;
+      background: #3f6f55;
+      color: #fff;
+      border-bottom: 1px solid #2f5c44;
+      border-right: 1px solid rgba(255,255,255,0.18);
+      text-align: left;
+      padding: 0 8px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .records-table td {
+      height: 32px;
+      border-bottom: 1px solid #e5e5e5;
+      border-right: 1px solid #f2f2f2;
+      padding: 0 8px;
+      white-space: nowrap;
+      vertical-align: middle;
+      background: #fff;
+    }
+
+    .records-table tr:nth-child(even) td { background: #f4f4f4; }
+    .records-table tr:hover td { background: #eef5ff; }
+
+    .records-table .center { text-align: center; }
+    .records-table .strong { font-weight: 700; }
+
     @media (max-width: 1100px) {
       .filters {
         grid-template-columns: 30px 1fr 1fr 30px;
@@ -663,7 +761,7 @@
       <button class="rail-btn active" id="reportNav" title="Executors report">⌂</button>
       <button class="rail-btn" id="refreshNav" title="Refresh">⟳</button>
       <button class="rail-btn" id="employeesNav" title="Employees and QR">▣</button>
-      <button class="rail-btn" id="kioskNav" title="Employee kiosk">◇</button>
+      <button class="rail-btn" id="kioskNav" title="DTR records">☷</button>
     </aside>
 
     <main class="main">
@@ -817,26 +915,36 @@
       </section>
 
       <section id="kioskView" class="view">
-        <div class="kiosk-shell">
-          <div class="kiosk-card">
-            <h1>Employee Kiosk</h1>
-            <p>Scan an employee QR code or enter the employee code manually, then select the attendance action.</p>
-
-            <div class="form-field">
-              <label for="kioskCode">Employee Code</label>
-              <input id="kioskCode" placeholder="Scan or type employee code" />
+        <div class="records-shell">
+          <div class="records-toolbar">
+            <div class="records-search-wrap">
+              <label for="dtrSearch">Search</label>
+              <input id="dtrSearch" placeholder="Search employee, department, position, action, or time" />
             </div>
+            <div id="dtrRecordCount" class="records-count">0 record(s)</div>
+          </div>
 
-            <div id="kioskEmployeeBox" class="message">No employee selected.</div>
-
-            <div class="action-grid">
-              <button class="action-btn" data-action="arrival">Arrived</button>
-              <button class="action-btn" data-action="breakStart">Break Start</button>
-              <button class="action-btn" data-action="breakEnd">Break End</button>
-              <button class="action-btn" data-action="departure">Departure</button>
-            </div>
-
-            <div id="kioskMessage" class="message">Ready.</div>
+          <div class="records-table-wrap">
+            <table class="records-table">
+              <thead>
+                <tr>
+                  <th>Employee Name</th>
+                  <th>Department</th>
+                  <th>Position</th>
+                  <th class="center">Arrival</th>
+                  <th class="center">Break Start</th>
+                  <th class="center">Short Break Start</th>
+                  <th class="center">Break End</th>
+                  <th class="center">Short Break End</th>
+                  <th class="center">Departure</th>
+                  <th>Last Action</th>
+                  <th class="center">Work Hours</th>
+                </tr>
+              </thead>
+              <tbody id="dtrRecordsBody">
+                <tr><td colspan="11" class="empty-state">Loading DTR records...</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
@@ -851,6 +959,7 @@
     const state = {
       employees: [],
       reportRows: [],
+      dtrRows: [],
       selectedQrEmployee: null,
       currentQrDataUrl: "",
       loading: false
@@ -1010,7 +1119,7 @@
 
     function currentTime() {
       const d = new Date();
-      return pad(d.gethrs()) + ":" + pad(d.getMinutes());
+      return pad(d.getHours()) + ":" + pad(d.getMinutes());
     }
 
     function setMessage(id, message, type) {
@@ -1121,12 +1230,21 @@
       return data;
     }
 
+    async function loadDtrRows() {
+      const data = await jsonpRequest({ action: "getDtrRows" });
+      if (!data.ok) throw new Error(data.error || "Could not load DTR records.");
+      state.dtrRows = data.rows || [];
+      renderDtrRecords();
+      return data;
+    }
+
     async function refreshAll() {
       try {
         state.loading = true;
         document.getElementById("reportStatus").textContent = "Loading...";
         await loadEmployees();
         await loadReport();
+        await loadDtrRows();
         handleUrlKiosk();
       } catch (err) {
         document.getElementById("reportStatus").textContent = err.message;
@@ -1210,7 +1328,7 @@
           };
         }
 
-        const mins = Number(row.hrs ?? row.hrs ?? 0);
+        const mins = Number(row.hours ?? row.hrs ?? row.workMinutes ?? 0);
 
         // Only use DTR profile values when employee is not found in Employees sheet.
         if (!map[key].fromEmployees) {
@@ -1275,6 +1393,52 @@
 
       document.getElementById("employeeCount").textContent = rows.length;
       document.getElementById("reportStatus").innerHTML = `Showing <strong>${rows.length}</strong> employee(s) · <strong>${dates.length}</strong> day(s)`;
+    }
+
+
+    function renderDtrRecords() {
+      const body = document.getElementById("dtrRecordsBody");
+      const count = document.getElementById("dtrRecordCount");
+      const search = String(document.getElementById("dtrSearch")?.value || "").trim().toLowerCase();
+      if (!body) return;
+
+      const rows = (state.dtrRows || []).filter(row => {
+        if (!search) return true;
+        return [
+          row.name,
+          row.department,
+          row.position,
+          row.arrival,
+          row.breakStart,
+          row.shortBreakStart,
+          row.breakEnd,
+          row.shortBreakEnd,
+          row.departure,
+          row.lastAction,
+          row.workHours
+        ].some(value => String(value || "").toLowerCase().includes(search));
+      });
+
+      if (count) count.textContent = rows.length + " record(s)";
+
+      if (!rows.length) {
+        body.innerHTML = `<tr><td colspan="11" class="empty-state">No DTR records found.</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = rows.map(row => `<tr>
+        <td class="strong">${escapeHtml(row.name || "")}</td>
+        <td>${escapeHtml(row.department || "")}</td>
+        <td>${escapeHtml(row.position || "")}</td>
+        <td class="center">${escapeHtml(row.arrival || "")}</td>
+        <td class="center">${escapeHtml(row.breakStart || "")}</td>
+        <td class="center">${escapeHtml(row.shortBreakStart || "")}</td>
+        <td class="center">${escapeHtml(row.breakEnd || "")}</td>
+        <td class="center">${escapeHtml(row.shortBreakEnd || "")}</td>
+        <td class="center">${escapeHtml(row.departure || "")}</td>
+        <td>${escapeHtml(row.lastAction || "")}</td>
+        <td class="center strong">${escapeHtml(row.workHours || "")}</td>
+      </tr>`).join("");
     }
 
     function renderEmployeeTable() {
@@ -1536,18 +1700,13 @@
       document.getElementById("employeesNav").classList.toggle("active", view === "employees");
       document.getElementById("kioskNav").classList.toggle("active", view === "kiosk");
 
-      document.getElementById("pageTitle").textContent = view === "report" ? "Executors" : view === "employees" ? "Employee QR Codes" : "Employee Kiosk";
+      document.getElementById("pageTitle").textContent = view === "report" ? "Executors" : view === "employees" ? "Employee QR Codes" : "DTR Records";
+      if (view === "kiosk") loadDtrRows().catch(function(err) { console.error(err); });
     }
 
     function handleUrlKiosk() {
-      const params = new URLSearchParams(location.search);
-      const code = params.get("employee") || params.get("code") || "";
-      const view = params.get("view") || "";
-      if (code) {
-        document.getElementById("kioskCode").value = code.toUpperCase();
-        renderKioskEmployee();
-      }
-      if (view === "employee" || code) showView("kiosk");
+      // Admin /DTR page no longer contains the employee punch kiosk.
+      // Employee QR codes should open https://decosite.github.io/kioskdtr/index.html.
     }
 
     function escapeHtml(value) {
@@ -1588,10 +1747,8 @@
       document.getElementById("saveQrBtn").addEventListener("click", saveSelectedQrToDrive);
       document.getElementById("empShift").addEventListener("change", updateDutySummary);
 
-      document.getElementById("kioskCode").addEventListener("input", renderKioskEmployee);
-      document.querySelectorAll(".action-btn").forEach(btn => {
-        btn.addEventListener("click", () => submitKioskAction(btn.dataset.action));
-      });
+      const dtrSearch = document.getElementById("dtrSearch");
+      if (dtrSearch) dtrSearch.addEventListener("input", renderDtrRecords);
     }
 
     window.addEventListener("DOMContentLoaded", () => {
