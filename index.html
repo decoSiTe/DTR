@@ -651,6 +651,58 @@
     .records-table .center { text-align: center; }
     .records-table .strong { font-weight: 700; }
 
+
+
+    .report-status-line {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) minmax(260px, 420px) auto;
+      align-items: center;
+    }
+
+    .report-search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .report-search-wrap label {
+      color: #111827;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .report-search-wrap input {
+      width: 100%;
+      height: 28px;
+      border: 1px solid #d0d5dd;
+      border-radius: 5px;
+      padding: 5px 9px;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    .report-counts {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .select-col {
+      width: 42px;
+      min-width: 42px;
+      text-align: center;
+    }
+
+    .select-col input {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--purple);
+      cursor: pointer;
+    }
+
+    .dtr-print-root { display: none; }
+
     @media (max-width: 1100px) {
       .filters {
         grid-template-columns: 30px 1fr 1fr 30px;
@@ -774,7 +826,6 @@
   <div class="app">
     <aside class="rail">
       <button class="rail-btn active" id="reportNav" title="Executors report">⌂</button>
-      <button class="rail-btn" id="refreshNav" title="Refresh">⟳</button>
       <button class="rail-btn" id="employeesNav" title="Employees and QR">▣</button>
       <button class="rail-btn" id="kioskNav" title="DTR records">☷</button>
     </aside>
@@ -784,8 +835,7 @@
         <div class="brand"><span class="brand-mark"></span><span id="pageTitle">Executors</span></div>
         <div class="top-actions">
           <button class="icon-btn" id="openDriveBtn" title="Employee QR Codes Drive folder">QR Drive</button>
-          <button class="icon-btn" id="refreshBtn" title="Refresh report">⟳</button>
-          <button class="icon-btn" id="printBtn" title="Print current page">⧉</button>
+          <button class="icon-btn" id="printBtn" title="Export selected DTR">Export DTR</button>
         </div>
       </div>
 
@@ -827,9 +877,15 @@
           </div>
         </div>
 
-        <div class="status-line">
+        <div class="status-line report-status-line">
           <div id="reportStatus">Loading...</div>
-          <div><strong id="employeeCount">0</strong> employees</div>
+          <div class="report-search-wrap">
+            <label for="reportSearch">Search</label>
+            <input id="reportSearch" placeholder="Search employee, department, or position" />
+          </div>
+          <div class="report-counts">
+            <strong id="selectedCount">0</strong> selected · <strong id="employeeCount">0</strong> employees
+          </div>
         </div>
 
         <div class="table-shell">
@@ -975,6 +1031,7 @@
       employees: [],
       reportRows: [],
       dtrRows: [],
+      selectedReportCodes: new Set(),
       selectedQrEmployee: null,
       currentQrDataUrl: "",
       loading: false
@@ -1366,17 +1423,65 @@
       return { dates, rows };
     }
 
-    function renderReport() {
+    function normalizeCode(code) {
+      return String(code || "").trim().toUpperCase();
+    }
+
+    function getFilteredReportRows() {
       const built = buildReportRows();
+      const search = String(document.getElementById("reportSearch")?.value || "").trim().toLowerCase();
+      if (!search) return built;
+
+      built.rows = built.rows.filter(row => [
+        row.code,
+        row.name,
+        row.department,
+        row.position
+      ].some(value => String(value || "").toLowerCase().includes(search)));
+      return built;
+    }
+
+    function updateSelectedCount() {
+      const selected = state.selectedReportCodes ? state.selectedReportCodes.size : 0;
+      const selectedEl = document.getElementById("selectedCount");
+      if (selectedEl) selectedEl.textContent = selected;
+    }
+
+    function toggleReportSelection(code, checked) {
+      const key = normalizeCode(code);
+      if (!key) return;
+      if (checked) state.selectedReportCodes.add(key);
+      else state.selectedReportCodes.delete(key);
+      updateSelectedCount();
+      renderReport();
+    }
+
+    function toggleAllReportSelection(checked) {
+      const built = getFilteredReportRows();
+      built.rows.forEach(row => {
+        const key = normalizeCode(row.code);
+        if (!key) return;
+        if (checked) state.selectedReportCodes.add(key);
+        else state.selectedReportCodes.delete(key);
+      });
+      updateSelectedCount();
+      renderReport();
+    }
+
+    function renderReport() {
+      const built = getFilteredReportRows();
       const dates = built.dates;
       const rows = built.rows;
       const head = document.getElementById("reportHead");
       const body = document.getElementById("reportBody");
       const table = document.getElementById("reportTable");
 
-      table.style.minWidth = Math.max(1150, 610 + dates.length * 104) + "px";
+      table.style.minWidth = Math.max(1220, 660 + dates.length * 104) + "px";
+
+      const allVisibleSelected = rows.length > 0 && rows.every(row => state.selectedReportCodes.has(normalizeCode(row.code)));
 
       head.innerHTML = `<tr>
+        <th class="select-col center"><input type="checkbox" id="selectAllReport" ${allVisibleSelected ? "checked" : ""} onchange="toggleAllReportSelection(this.checked)" title="Select all visible employees"></th>
         <th class="col-num">#</th>
         <th class="col-name">Name</th>
         <th class="col-dept">Department</th>
@@ -1386,9 +1491,11 @@
       </tr>`;
 
       if (!rows.length) {
-        body.innerHTML = `<tr><td colspan="${5 + dates.length}" class="empty-state">No employees or attendance records found.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="${6 + dates.length}" class="empty-state">No employees or attendance records found.</td></tr>`;
       } else {
         body.innerHTML = rows.map((row, index) => {
+          const codeKey = normalizeCode(row.code);
+          const checked = state.selectedReportCodes.has(codeKey) ? "checked" : "";
           const dayCells = dates.map(d => {
             const mins = row.days[d] || 0;
             if (!mins) return `<td class="dash">-</td>`;
@@ -1396,6 +1503,7 @@
           }).join("");
 
           return `<tr>
+            <td class="select-col center"><input type="checkbox" ${checked} onchange="toggleReportSelection('${escapeAttr(row.code)}', this.checked)" title="Select ${escapeAttr(row.name)} for DTR export"></td>
             <td class="col-num"><span class="orange-flag">1</span>${index + 1}</td>
             <td class="col-name"><span class="truncate" title="${escapeHtml(row.name)}">${escapeHtml(row.name || "")}</span></td>
             <td class="col-dept"><span class="truncate" title="${escapeHtml(row.department)}">${escapeHtml(row.department || "")}</span></td>
@@ -1408,8 +1516,168 @@
 
       document.getElementById("employeeCount").textContent = rows.length;
       document.getElementById("reportStatus").innerHTML = `Showing <strong>${rows.length}</strong> employee(s) · <strong>${dates.length}</strong> day(s)`;
+      updateSelectedCount();
     }
 
+    function toMinutesFromHMS(value) {
+      const parts = String(value || "").split(":").map(Number);
+      if (!parts.length || isNaN(parts[0])) return 0;
+      return (parts[0] || 0) * 60 + (parts[1] || 0);
+    }
+
+    function formatPeriodDate(iso) {
+      const d = parseIso(iso);
+      return pad(d.getDate()) + " " + monthNames[d.getMonth()].toUpperCase() + " " + d.getFullYear();
+    }
+
+    function dtrRowsForEmployee(code, from, to) {
+      const codeKey = normalizeCode(code);
+      return (state.dtrRows || [])
+        .filter(row => normalizeCode(row.code) === codeKey && row.date >= from && row.date <= to)
+        .sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")));
+    }
+
+    function buildDailyMap(rows) {
+      const map = {};
+      rows.forEach(row => {
+        const d = parseIso(row.date);
+        const day = d.getDate();
+        map[day] = row;
+      });
+      return map;
+    }
+
+    function buildDtrSlip(employee, from, to) {
+      const rows = dtrRowsForEmployee(employee.code, from, to);
+      const daily = buildDailyMap(rows);
+      const totalMins = rows.reduce((sum, row) => sum + toMinutesFromHMS(row.workHours), 0);
+      const period = formatPeriodDate(from) + " - " + formatPeriodDate(to);
+
+      const bodyRows = Array.from({ length: 31 }, (_, i) => {
+        const day = i + 1;
+        const r = daily[day] || {};
+        return `<tr>
+          <td class="dtr-day">${day}</td>
+          <td>${escapeHtml(r.arrival || "")}</td>
+          <td>${escapeHtml(r.breakStart || "")}</td>
+          <td>${escapeHtml(r.breakEnd || "")}</td>
+          <td>${escapeHtml(r.departure || "")}</td>
+          <td></td>
+          <td></td>
+        </tr>`;
+      }).join("");
+
+      return `<section class="dtr-slip">
+        <div class="dtr-logo">LOGO</div>
+        <div class="dtr-title">DAILY TIME RECORD</div>
+        <div class="dtr-ornament">---o0o---</div>
+        <div class="dtr-line"><span>${escapeHtml(employee.name || "")}</span></div>
+        <div class="dtr-label">NAME</div>
+        <div class="dtr-line"><span>${escapeHtml(period)}</span></div>
+        <div class="dtr-label">Period Covered</div>
+        <table class="dtr-table">
+          <thead>
+            <tr>
+              <th rowspan="2" class="dtr-day">Day</th>
+              <th colspan="2">A.M.</th>
+              <th colspan="2">P.M.</th>
+              <th colspan="2">Undertime</th>
+            </tr>
+            <tr>
+              <th>Arrival</th>
+              <th>Departure</th>
+              <th>Arrival</th>
+              <th>Departure</th>
+              <th>Hours</th>
+              <th>Minutes</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${bodyRows}
+            <tr class="dtr-total-row"><td colspan="5">Total</td><td colspan="2">${minutesToHMS(totalMins)}</td></tr>
+          </tbody>
+        </table>
+      </section>`;
+    }
+
+    function buildDtrPrintHtml(selectedEmployees, from, to) {
+      const slips = selectedEmployees.map(emp => buildDtrSlip(emp, from, to)).join("");
+      return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>DTR Export</title>
+<style>
+  @page { size: A4 portrait; margin: 6mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #000; background: #fff; }
+  .print-page { width: 198mm; min-height: 285mm; display: grid; grid-template-rows: 1fr 1fr; gap: 4mm; page-break-after: always; }
+  .dtr-slip { border: 1px solid #222; padding: 3mm 3mm 2mm; height: 140mm; overflow: hidden; }
+  .dtr-logo { height: 15mm; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; letter-spacing: 1px; }
+  .dtr-title { text-align: center; font-size: 16px; font-weight: 900; letter-spacing: 1px; margin-top: 1mm; }
+  .dtr-ornament { text-align: center; font-size: 9px; margin: 0 0 2mm; }
+  .dtr-line { border-top: 2px solid #111; height: 7mm; display: flex; align-items: end; justify-content: center; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .dtr-line span { transform: translateY(1mm); background: #fff; padding: 0 4mm; }
+  .dtr-label { text-align: center; font-size: 10px; font-weight: 800; margin: 0 0 2mm; }
+  .dtr-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 8.5px; }
+  .dtr-table th, .dtr-table td { border: 1px solid #333; height: 3.25mm; text-align: center; vertical-align: middle; padding: 0; }
+  .dtr-table th { font-weight: 800; }
+  .dtr-table .dtr-day { width: 10mm; font-weight: 800; }
+  .dtr-total-row td { height: 4.2mm; font-weight: 800; text-align: right; padding-right: 3mm; }
+  .dtr-total-row td:last-child { text-align: center; padding-right: 0; }
+  @media screen { body { background: #e5e7eb; padding: 12px; } .print-page { background: #fff; margin: 0 auto 12px; padding: 0; box-shadow: 0 4px 18px rgba(0,0,0,.15); } }
+</style>
+</head>
+<body>
+${selectedEmployees.reduce((html, _, index) => {
+  if (index % 2 === 0) html += '<div class="print-page">';
+  html += selectedEmployees[index] ? buildDtrSlip(selectedEmployees[index], from, to) : '<section class="dtr-slip"></section>';
+  if (index % 2 === 1 || index === selectedEmployees.length - 1) html += index % 2 === 0 ? '<section class="dtr-slip"></section></div>' : '</div>';
+  return html;
+}, "")}
+<script>window.onload = function(){ setTimeout(function(){ window.print(); }, 300); };<\/script>
+</body>
+</html>`;
+    }
+
+    async function exportSelectedDtr() {
+      const from = document.getElementById("fromDate").value;
+      const to = document.getElementById("toDate").value;
+      const selectedCodes = Array.from(state.selectedReportCodes || []);
+
+      if (!selectedCodes.length) {
+        alert("Please tick at least one employee to export DTR.");
+        return;
+      }
+
+      if (!state.dtrRows || !state.dtrRows.length) {
+        await loadDtrRows();
+      }
+
+      const built = buildReportRows();
+      const employeesByCode = {};
+      built.rows.forEach(row => employeesByCode[normalizeCode(row.code)] = row);
+
+      const selectedEmployees = selectedCodes
+        .map(code => employeesByCode[normalizeCode(code)])
+        .filter(Boolean)
+        .sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
+
+      if (!selectedEmployees.length) {
+        alert("Selected employees are not in the current report range.");
+        return;
+      }
+
+      const html = buildDtrPrintHtml(selectedEmployees, from, to);
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) {
+        alert("Popup blocked. Please allow popups for this site, then export again.");
+        return;
+      }
+      printWindow.document.open();
+      printWindow.document.write(html);
+      printWindow.document.close();
+    }
 
     function renderDtrRecords() {
       const body = document.getElementById("dtrRecordsBody");
@@ -1741,9 +2009,7 @@
       document.getElementById("reportNav").addEventListener("click", () => showView("report"));
       document.getElementById("employeesNav").addEventListener("click", () => showView("employees"));
       document.getElementById("kioskNav").addEventListener("click", () => showView("kiosk"));
-      document.getElementById("refreshNav").addEventListener("click", refreshAll);
-      document.getElementById("refreshBtn").addEventListener("click", refreshAll);
-      document.getElementById("printBtn").addEventListener("click", () => window.print());
+      document.getElementById("printBtn").addEventListener("click", exportSelectedDtr);
       document.getElementById("openDriveBtn").addEventListener("click", () => window.open(QR_DRIVE_URL, "_blank"));
 
       document.getElementById("prevRangeBtn").addEventListener("click", () => shiftDateRange(-1));
@@ -1754,6 +2020,8 @@
       document.getElementById("yearInput").addEventListener("change", applyMonthYearToRange);
       document.getElementById("departmentFilter").addEventListener("change", renderReport);
       document.getElementById("positionFilter").addEventListener("change", renderReport);
+      const reportSearch = document.getElementById("reportSearch");
+      if (reportSearch) reportSearch.addEventListener("input", renderReport);
 
       document.getElementById("saveEmployeeBtn").addEventListener("click", saveEmployee);
       document.getElementById("clearEmployeeFormBtn").addEventListener("click", clearEmployeeForm);
@@ -1773,6 +2041,9 @@
       attachEvents();
       refreshAll();
 
+      // Auto-refresh data every 15 seconds.
+      // DTR Records view refreshes from Google Sheet without reloading the page.
+      // Search text stays active while the records update.
       setInterval(() => {
         if (document.visibilityState !== "visible") return;
 
@@ -1785,7 +2056,7 @@
         }
 
         if (reportView && reportView.classList.contains("active")) {
-          refreshReport().catch(function(err) { console.error(err); });
+          Promise.all([refreshReport(), loadDtrRows()]).catch(function(err) { console.error(err); });
         }
       }, 15000);
     });
