@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Executors - DTR QR System</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #f7f7f8;
@@ -651,58 +654,6 @@
     .records-table .center { text-align: center; }
     .records-table .strong { font-weight: 700; }
 
-
-
-    .report-status-line {
-      display: grid;
-      grid-template-columns: minmax(220px, 1fr) minmax(260px, 420px) auto;
-      align-items: center;
-    }
-
-    .report-search-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 0;
-    }
-
-    .report-search-wrap label {
-      color: #111827;
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .report-search-wrap input {
-      width: 100%;
-      height: 28px;
-      border: 1px solid #d0d5dd;
-      border-radius: 5px;
-      padding: 5px 9px;
-      font-size: 13px;
-      background: #fff;
-    }
-
-    .report-counts {
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    .select-col {
-      width: 42px;
-      min-width: 42px;
-      text-align: center;
-    }
-
-    .select-col input {
-      width: 15px;
-      height: 15px;
-      accent-color: var(--purple);
-      cursor: pointer;
-    }
-
-    .dtr-print-root { display: none; }
-
     @media (max-width: 1100px) {
       .filters {
         grid-template-columns: 30px 1fr 1fr 30px;
@@ -820,12 +771,323 @@
       #employeesView .panel { overflow: auto; }
       #employeesView .cards { height: auto; }
     }
+
+/* === Minimalist Modern UI refresh === */
+:root {
+  --bg: #FAFAFA;
+  --panel: #FFFFFF;
+  --line: #E2E8F0;
+  --line-soft: #EEF2F7;
+  --text: #0F172A;
+  --muted: #64748B;
+  --purple: #0052FF;
+  --purple-soft: rgba(0, 82, 255, 0.08);
+  --blue: #0052FF;
+  --green: #16A34A;
+  --red: #DC2626;
+  --orange: #F97316;
+  --rail: #0F172A;
+  --header: #F8FAFC;
+  --hover: #F1F5F9;
+  --row-alt: #F8FAFC;
+  --accent: #0052FF;
+  --accent-2: #4D7CFF;
+  --card-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+  --accent-shadow: 0 10px 26px rgba(0, 82, 255, 0.22);
+}
+
+html, body {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 15% 5%, rgba(0, 82, 255, 0.08), transparent 30%),
+    radial-gradient(circle at 90% 0%, rgba(77, 124, 255, 0.10), transparent 28%),
+    var(--bg);
+}
+
+.app {
+  grid-template-columns: 64px 1fr;
+}
+
+.rail {
+  background:
+    radial-gradient(circle at top, rgba(77, 124, 255, 0.28), transparent 34%),
+    #0F172A;
+  border-right: 0;
+  padding: 14px 8px;
+  gap: 10px;
+  box-shadow: 12px 0 30px rgba(15, 23, 42, 0.12);
+}
+
+.rail-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  color: rgba(255,255,255,0.72);
+  font-size: 17px;
+  transition: transform .18s ease, background .18s ease, color .18s ease, box-shadow .18s ease;
+}
+
+.rail-btn:hover {
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.rail-btn.active {
+  color: #fff;
+  border-color: rgba(255,255,255,0.18);
+  background: linear-gradient(135deg, #0052FF, #4D7CFF);
+  box-shadow: 0 12px 28px rgba(0, 82, 255, 0.35);
+}
+
+.main {
+  background: transparent;
+}
+
+.titlebar {
+  height: 56px;
+  padding: 0 18px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(14px);
+}
+
+.brand {
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.brand-mark {
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0052FF, #4D7CFF);
+  box-shadow: 0 10px 24px rgba(0, 82, 255, 0.28);
+}
+
+.brand-mark::after {
+  background: #fff;
+  opacity: .95;
+}
+
+.icon-btn, .btn, .range-btn {
+  border-radius: 12px;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
+}
+
+.icon-btn {
+  height: 34px;
+  border-color: var(--line);
+  color: var(--text);
+  font-weight: 700;
+  background: rgba(255,255,255,0.9);
+}
+
+.icon-btn:hover, .range-btn:hover {
+  border-color: rgba(0, 82, 255, 0.22);
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(15,23,42,.08);
+  transform: translateY(-1px);
+}
+
+#printBtn {
+  color: #fff;
+  border: 0;
+  background: linear-gradient(135deg, #0052FF, #4D7CFF);
+  box-shadow: var(--accent-shadow);
+}
+
+.filters {
+  margin: 14px 14px 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255,255,255,0.88);
+  box-shadow: 0 10px 30px rgba(15,23,42,.05);
+}
+
+.field label,
+.records-search-wrap label,
+.report-search-wrap label {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.field input, .field select,
+.records-search-wrap input,
+.report-search-wrap input,
+.form-field input, .form-field select {
+  border-color: var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text);
+  outline: none;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.field input:focus, .field select:focus,
+.records-search-wrap input:focus,
+.report-search-wrap input:focus,
+.form-field input:focus, .form-field select:focus {
+  border-color: rgba(0, 82, 255, 0.55);
+  box-shadow: 0 0 0 4px rgba(0, 82, 255, 0.10);
+}
+
+.status-line,
+.records-toolbar {
+  margin: 10px 14px 0;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255,255,255,.9);
+  box-shadow: 0 10px 28px rgba(15,23,42,.04);
+}
+
+.table-shell,
+.records-table-wrap {
+  margin: 12px 14px 14px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: var(--card-shadow);
+}
+
+table {
+  font-size: 12.5px;
+}
+
+thead th,
+.records-table thead th,
+.records-table th {
+  top: 0;
+  height: 38px;
+  background: #0F172A;
+  color: #fff;
+  border-right: 1px solid rgba(255,255,255,.12);
+  border-bottom: 0;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+tbody td,
+.records-table td {
+  height: 42px;
+  border-right: 1px solid #EEF2F7;
+  border-bottom: 1px solid #EEF2F7;
+}
+
+tbody tr:nth-child(even) td,
+.records-table tr:nth-child(even) td {
+  background: #F8FAFC;
+}
+
+tbody tr:hover td,
+.records-table tr:hover td {
+  background: rgba(0, 82, 255, 0.06);
+}
+
+.time-cell,
+.records-table .strong {
+  color: var(--text);
+}
+
+.records-shell {
+  background:
+    radial-gradient(circle at 12% 4%, rgba(0, 82, 255, 0.08), transparent 28%),
+    var(--bg);
+  padding: 0;
+}
+
+.records-toolbar {
+  padding: 12px 14px;
+  border-radius: 20px;
+}
+
+.records-search-wrap input {
+  height: 40px;
+  max-width: 520px;
+}
+
+.records-count {
+  font-family: "JetBrains Mono", monospace;
+  color: var(--accent);
+  font-weight: 700;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(0,82,255,.08);
+}
+
+.records-table {
+  min-width: 1320px;
+}
+
+.records-table .date-cell,
+.records-table .date-head {
+  min-width: 118px;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+}
+
+.card {
+  border-color: var(--line);
+  border-radius: 22px;
+  box-shadow: var(--card-shadow);
+}
+
+.card h2, .card h3 {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.btn {
+  border: 0;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #0052FF, #4D7CFF);
+  box-shadow: 0 8px 18px rgba(0, 82, 255, 0.20);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(0, 82, 255, 0.28);
+}
+
+.btn.secondary {
+  background: #fff;
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+
+.btn.green {
+  background: linear-gradient(135deg, #16A34A, #22C55E);
+}
+
+.btn.red {
+  background: linear-gradient(135deg, #DC2626, #F43F5E);
+}
+
+.btn.purple {
+  background: linear-gradient(135deg, #0052FF, #4D7CFF);
+}
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: 52px 1fr; }
+  .rail-btn { width: 36px; height: 36px; border-radius: 12px; }
+  .filters, .status-line, .records-toolbar, .table-shell, .records-table-wrap { margin-left: 8px; margin-right: 8px; }
+  .report-status-line { grid-template-columns: 1fr; gap: 8px; }
+}
+
   </style>
 </head>
 <body>
   <div class="app">
     <aside class="rail">
       <button class="rail-btn active" id="reportNav" title="Executors report">⌂</button>
+      <button class="rail-btn" id="refreshNav" title="Refresh">⟳</button>
       <button class="rail-btn" id="employeesNav" title="Employees and QR">▣</button>
       <button class="rail-btn" id="kioskNav" title="DTR records">☷</button>
     </aside>
@@ -835,7 +1097,8 @@
         <div class="brand"><span class="brand-mark"></span><span id="pageTitle">Executors</span></div>
         <div class="top-actions">
           <button class="icon-btn" id="openDriveBtn" title="Employee QR Codes Drive folder">QR Drive</button>
-          <button class="icon-btn" id="printBtn" title="Export selected DTR">Export DTR</button>
+          <button class="icon-btn" id="refreshBtn" title="Refresh report">⟳</button>
+          <button class="icon-btn" id="printBtn" title="Print current page">⧉</button>
         </div>
       </div>
 
@@ -877,15 +1140,9 @@
           </div>
         </div>
 
-        <div class="status-line report-status-line">
+        <div class="status-line">
           <div id="reportStatus">Loading...</div>
-          <div class="report-search-wrap">
-            <label for="reportSearch">Search</label>
-            <input id="reportSearch" placeholder="Search employee, department, or position" />
-          </div>
-          <div class="report-counts">
-            <strong id="selectedCount">0</strong> selected · <strong id="employeeCount">0</strong> employees
-          </div>
+          <div><strong id="employeeCount">0</strong> employees</div>
         </div>
 
         <div class="table-shell">
@@ -999,6 +1256,7 @@
             <table class="records-table">
               <thead>
                 <tr>
+                  <th class="date-head">Date</th>
                   <th>Employee Name</th>
                   <th>Department</th>
                   <th>Position</th>
@@ -1013,7 +1271,7 @@
                 </tr>
               </thead>
               <tbody id="dtrRecordsBody">
-                <tr><td colspan="11" class="empty-state">Loading DTR records...</td></tr>
+                <tr><td colspan="12" class="empty-state">Loading DTR records...</td></tr>
               </tbody>
             </table>
           </div>
@@ -1031,7 +1289,6 @@
       employees: [],
       reportRows: [],
       dtrRows: [],
-      selectedReportCodes: new Set(),
       selectedQrEmployee: null,
       currentQrDataUrl: "",
       loading: false
@@ -1423,65 +1680,17 @@
       return { dates, rows };
     }
 
-    function normalizeCode(code) {
-      return String(code || "").trim().toUpperCase();
-    }
-
-    function getFilteredReportRows() {
-      const built = buildReportRows();
-      const search = String(document.getElementById("reportSearch")?.value || "").trim().toLowerCase();
-      if (!search) return built;
-
-      built.rows = built.rows.filter(row => [
-        row.code,
-        row.name,
-        row.department,
-        row.position
-      ].some(value => String(value || "").toLowerCase().includes(search)));
-      return built;
-    }
-
-    function updateSelectedCount() {
-      const selected = state.selectedReportCodes ? state.selectedReportCodes.size : 0;
-      const selectedEl = document.getElementById("selectedCount");
-      if (selectedEl) selectedEl.textContent = selected;
-    }
-
-    function toggleReportSelection(code, checked) {
-      const key = normalizeCode(code);
-      if (!key) return;
-      if (checked) state.selectedReportCodes.add(key);
-      else state.selectedReportCodes.delete(key);
-      updateSelectedCount();
-      renderReport();
-    }
-
-    function toggleAllReportSelection(checked) {
-      const built = getFilteredReportRows();
-      built.rows.forEach(row => {
-        const key = normalizeCode(row.code);
-        if (!key) return;
-        if (checked) state.selectedReportCodes.add(key);
-        else state.selectedReportCodes.delete(key);
-      });
-      updateSelectedCount();
-      renderReport();
-    }
-
     function renderReport() {
-      const built = getFilteredReportRows();
+      const built = buildReportRows();
       const dates = built.dates;
       const rows = built.rows;
       const head = document.getElementById("reportHead");
       const body = document.getElementById("reportBody");
       const table = document.getElementById("reportTable");
 
-      table.style.minWidth = Math.max(1220, 660 + dates.length * 104) + "px";
-
-      const allVisibleSelected = rows.length > 0 && rows.every(row => state.selectedReportCodes.has(normalizeCode(row.code)));
+      table.style.minWidth = Math.max(1150, 610 + dates.length * 104) + "px";
 
       head.innerHTML = `<tr>
-        <th class="select-col center"><input type="checkbox" id="selectAllReport" ${allVisibleSelected ? "checked" : ""} onchange="toggleAllReportSelection(this.checked)" title="Select all visible employees"></th>
         <th class="col-num">#</th>
         <th class="col-name">Name</th>
         <th class="col-dept">Department</th>
@@ -1491,11 +1700,9 @@
       </tr>`;
 
       if (!rows.length) {
-        body.innerHTML = `<tr><td colspan="${6 + dates.length}" class="empty-state">No employees or attendance records found.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="${5 + dates.length}" class="empty-state">No employees or attendance records found.</td></tr>`;
       } else {
         body.innerHTML = rows.map((row, index) => {
-          const codeKey = normalizeCode(row.code);
-          const checked = state.selectedReportCodes.has(codeKey) ? "checked" : "";
           const dayCells = dates.map(d => {
             const mins = row.days[d] || 0;
             if (!mins) return `<td class="dash">-</td>`;
@@ -1503,7 +1710,6 @@
           }).join("");
 
           return `<tr>
-            <td class="select-col center"><input type="checkbox" ${checked} onchange="toggleReportSelection('${escapeAttr(row.code)}', this.checked)" title="Select ${escapeAttr(row.name)} for DTR export"></td>
             <td class="col-num"><span class="orange-flag">1</span>${index + 1}</td>
             <td class="col-name"><span class="truncate" title="${escapeHtml(row.name)}">${escapeHtml(row.name || "")}</span></td>
             <td class="col-dept"><span class="truncate" title="${escapeHtml(row.department)}">${escapeHtml(row.department || "")}</span></td>
@@ -1516,345 +1722,8 @@
 
       document.getElementById("employeeCount").textContent = rows.length;
       document.getElementById("reportStatus").innerHTML = `Showing <strong>${rows.length}</strong> employee(s) · <strong>${dates.length}</strong> day(s)`;
-      updateSelectedCount();
     }
 
-    function toMinutesFromHMS(value) {
-      const parts = String(value || "").split(":").map(Number);
-      if (!parts.length || isNaN(parts[0])) return 0;
-      return (parts[0] || 0) * 60 + (parts[1] || 0);
-    }
-
-    function formatPeriodDate(iso) {
-      const d = parseIso(iso);
-      return pad(d.getDate()) + " " + monthNames[d.getMonth()].toUpperCase() + " " + d.getFullYear();
-    }
-
-    function dtrRowsForEmployee(code, from, to) {
-      const codeKey = normalizeCode(code);
-      return (state.dtrRows || [])
-        .filter(row => normalizeCode(row.code) === codeKey && row.date >= from && row.date <= to)
-        .sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")));
-    }
-
-    function buildDailyMap(rows) {
-      const map = {};
-      rows.forEach(row => {
-        const d = parseIso(row.date);
-        const day = d.getDate();
-        map[day] = row;
-      });
-      return map;
-    }
-
-    function splitTimeParts(value) {
-      const parts = String(value || "").split(":").map(Number);
-      return {
-        h: isNaN(parts[0]) ? 0 : (parts[0] || 0),
-        m: isNaN(parts[1]) ? 0 : (parts[1] || 0)
-      };
-    }
-
-    function buildDtrSlip(employee, from, to) {
-      const rows = dtrRowsForEmployee(employee.code, from, to);
-      const daily = buildDailyMap(rows);
-      const period = formatPeriodDate(from) + " - " + formatPeriodDate(to);
-
-      const bodyRows = Array.from({ length: 31 }, (_, i) => {
-        const day = i + 1;
-        const r = daily[day] || {};
-        return `<tr>
-          <td class="dtr-day">${day}</td>
-          <td>${escapeHtml(r.arrival || "")}</td>
-          <td>${escapeHtml(r.breakStart || "")}</td>
-          <td>${escapeHtml(r.breakEnd || "")}</td>
-          <td>${escapeHtml(r.departure || "")}</td>
-          <td></td>
-          <td></td>
-        </tr>`;
-      }).join("");
-
-      return `<section class="dtr-slip">
-        <div class="dtr-logo-area">
-          <div class="logo-mark">LOGO</div>
-          <div class="logo-name">SOGA</div>
-          <div class="logo-sub">MANPOWER AGENCY</div>
-        </div>
-
-        <div class="dtr-title">DAILY TIME RECORD</div>
-        <div class="dtr-ornament">-----o0o-----</div>
-
-        <div class="dtr-name-line"><span>${escapeHtml(employee.name || "")}</span></div>
-        <div class="dtr-label">NAME</div>
-
-        <div class="dtr-period-line"><span>${escapeHtml(period)}</span></div>
-        <div class="dtr-label period-label">Period Covered</div>
-
-        <table class="dtr-table">
-          <colgroup>
-            <col class="day-col" />
-            <col class="time-col" />
-            <col class="time-col" />
-            <col class="time-col" />
-            <col class="time-col" />
-            <col class="under-col" />
-            <col class="under-col" />
-          </colgroup>
-          <thead>
-            <tr>
-              <th rowspan="2" class="dtr-day">Day</th>
-              <th colspan="2" class="group-head">A.M.</th>
-              <th colspan="2" class="group-head">P.M.</th>
-              <th colspan="2" class="group-head">Undertime</th>
-            </tr>
-            <tr>
-              <th>Arrival</th>
-              <th>Depar-<br>ture</th>
-              <th>Arrival</th>
-              <th>Depar-<br>ture</th>
-              <th>Hours</th>
-              <th>Min-<br>utes</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${bodyRows}
-            <tr class="dtr-total-row">
-              <td colspan="5" class="dtr-total-label">Total</td>
-              <td></td>
-              <td></td>
-            </tr>
-          </tbody>
-        </table>
-      </section>`;
-    }
-
-    function buildDtrPrintHtml(selectedEmployees, from, to) {
-      return `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>DTR Export</title>
-<style>
-  @page { size: A4 portrait; margin: 6mm; }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; color: #000; background: #fff; }
-  .print-page {
-    width: 198mm;
-    min-height: 285mm;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 5mm;
-    page-break-after: always;
-    break-after: page;
-  }
-  .print-page:last-child { page-break-after: auto; break-after: auto; }
-  .dtr-slip {
-    height: 285mm;
-    padding: 4mm 1mm 2mm;
-    overflow: hidden;
-    background: #fff;
-  }
-  .dtr-slip.blank { visibility: hidden; }
-
-  .dtr-logo-area {
-    height: 28mm;
-    display: grid;
-    grid-template-columns: 22mm 1fr;
-    grid-template-rows: 15mm 8mm;
-    align-items: center;
-    justify-content: center;
-    column-gap: 2mm;
-    max-width: 72mm;
-    margin: 0 auto 2mm;
-  }
-  .logo-mark {
-    grid-row: 1 / 3;
-    width: 21mm;
-    height: 21mm;
-    border: 2.4mm solid #000;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 6px;
-    font-weight: 900;
-    letter-spacing: .4px;
-  }
-  .logo-name {
-    font-size: 30px;
-    line-height: 1;
-    font-weight: 900;
-    letter-spacing: -1px;
-  }
-  .logo-sub {
-    font-size: 9px;
-    font-weight: 900;
-    letter-spacing: .2px;
-    align-self: start;
-  }
-
-  .dtr-title {
-    text-align: center;
-    font-size: 13px;
-    font-weight: 900;
-    letter-spacing: .5px;
-    line-height: 1;
-    margin-top: 1mm;
-  }
-  .dtr-ornament {
-    text-align: center;
-    font-size: 7px;
-    line-height: 1;
-    margin: 1mm 0 8mm;
-  }
-  .dtr-name-line,
-  .dtr-period-line {
-    border-top: 2.6px solid #000;
-    height: 10mm;
-    display: flex;
-    align-items: end;
-    justify-content: center;
-    text-align: center;
-    font-weight: 900;
-    text-transform: uppercase;
-  }
-  .dtr-name-line span,
-  .dtr-period-line span {
-    transform: translateY(3.15mm);
-    background: #fff;
-    padding: 0 2.5mm;
-    line-height: 1;
-    max-width: 86mm;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .dtr-name-line span {
-    font-size: 10px;
-    letter-spacing: .35px;
-  }
-  .dtr-period-line span {
-    font-size: 9px;
-    letter-spacing: .15px;
-  }
-  .dtr-label {
-    text-align: center;
-    font-size: 9px;
-    line-height: 1;
-    font-weight: 900;
-    letter-spacing: .3px;
-    margin: 1.2mm 0 5.5mm;
-  }
-  .period-label {
-    font-size: 10px;
-    letter-spacing: .1px;
-    margin-bottom: 2.6mm;
-  }
-
-  .dtr-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    font-size: 6.2px;
-    line-height: 1;
-  }
-  .dtr-table th,
-  .dtr-table td {
-    border: 1px solid #111;
-    height: 5.15mm;
-    text-align: center;
-    vertical-align: middle;
-    padding: 0;
-    font-weight: 700;
-  }
-  .dtr-table thead th {
-    height: 5.5mm;
-    font-weight: 900;
-    background: #fff;
-  }
-  .dtr-table thead tr:first-child th {
-    font-size: 7.5px;
-  }
-  .dtr-table thead tr:nth-child(2) th {
-    font-size: 6.2px;
-  }
-  .dtr-day,
-  .day-col { width: 8mm; }
-  .time-col { width: 16.4mm; }
-  .under-col { width: 15.5mm; }
-  .group-head { border-bottom-width: 1px; }
-  .dtr-table th:nth-child(2),
-  .dtr-table td:nth-child(2),
-  .dtr-table th:nth-child(4),
-  .dtr-table td:nth-child(4),
-  .dtr-table th:nth-child(6),
-  .dtr-table td:nth-child(6) { border-left-width: 2px; }
-  .dtr-total-row td {
-    height: 5.2mm;
-    font-size: 8px;
-    font-weight: 900;
-  }
-  .dtr-total-label {
-    text-align: right !important;
-    padding-right: 2mm !important;
-  }
-
-  @media screen {
-    body { background: #d1d5db; padding: 10px; }
-    .print-page { background: #fff; margin: 0 auto 12px; padding: 0; box-shadow: 0 4px 18px rgba(0,0,0,.2); }
-  }
-</style>
-</head>
-<body>
-${selectedEmployees.reduce((html, _, index) => {
-  if (index % 2 === 0) html += '<div class="print-page">';
-  html += selectedEmployees[index] ? buildDtrSlip(selectedEmployees[index], from, to) : '<section class="dtr-slip blank"></section>';
-  if (index % 2 === 1 || index === selectedEmployees.length - 1) html += index % 2 === 0 ? '<section class="dtr-slip blank"></section></div>' : '</div>';
-  return html;
-}, "")}
-<script>window.onload = function(){ setTimeout(function(){ window.print(); }, 300); };<\/script>
-</body>
-</html>`;
-    }
-
-    async function exportSelectedDtr() {
-      const from = document.getElementById("fromDate").value;
-      const to = document.getElementById("toDate").value;
-      const selectedCodes = Array.from(state.selectedReportCodes || []);
-
-      if (!selectedCodes.length) {
-        alert("Please tick at least one employee to export DTR.");
-        return;
-      }
-
-      if (!state.dtrRows || !state.dtrRows.length) {
-        await loadDtrRows();
-      }
-
-      const built = buildReportRows();
-      const employeesByCode = {};
-      built.rows.forEach(row => employeesByCode[normalizeCode(row.code)] = row);
-
-      const selectedEmployees = selectedCodes
-        .map(code => employeesByCode[normalizeCode(code)])
-        .filter(Boolean)
-        .sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
-
-      if (!selectedEmployees.length) {
-        alert("Selected employees are not in the current report range.");
-        return;
-      }
-
-      const html = buildDtrPrintHtml(selectedEmployees, from, to);
-      const printWindow = window.open("", "_blank");
-      if (!printWindow) {
-        alert("Popup blocked. Please allow popups for this site, then export again.");
-        return;
-      }
-      printWindow.document.open();
-      printWindow.document.write(html);
-      printWindow.document.close();
-    }
 
     function renderDtrRecords() {
       const body = document.getElementById("dtrRecordsBody");
@@ -1865,6 +1734,7 @@ ${selectedEmployees.reduce((html, _, index) => {
       const rows = (state.dtrRows || []).filter(row => {
         if (!search) return true;
         return [
+          row.date,
           row.name,
           row.department,
           row.position,
@@ -1882,11 +1752,12 @@ ${selectedEmployees.reduce((html, _, index) => {
       if (count) count.textContent = rows.length + " record(s)";
 
       if (!rows.length) {
-        body.innerHTML = `<tr><td colspan="11" class="empty-state">No DTR records found.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="12" class="empty-state">No DTR records found.</td></tr>`;
         return;
       }
 
       body.innerHTML = rows.map(row => `<tr>
+        <td class="center date-cell">${escapeHtml(row.date || "")}</td>
         <td class="strong">${escapeHtml(row.name || "")}</td>
         <td>${escapeHtml(row.department || "")}</td>
         <td>${escapeHtml(row.position || "")}</td>
@@ -2186,7 +2057,9 @@ ${selectedEmployees.reduce((html, _, index) => {
       document.getElementById("reportNav").addEventListener("click", () => showView("report"));
       document.getElementById("employeesNav").addEventListener("click", () => showView("employees"));
       document.getElementById("kioskNav").addEventListener("click", () => showView("kiosk"));
-      document.getElementById("printBtn").addEventListener("click", exportSelectedDtr);
+      document.getElementById("refreshNav").addEventListener("click", refreshAll);
+      document.getElementById("refreshBtn").addEventListener("click", refreshAll);
+      document.getElementById("printBtn").addEventListener("click", () => window.print());
       document.getElementById("openDriveBtn").addEventListener("click", () => window.open(QR_DRIVE_URL, "_blank"));
 
       document.getElementById("prevRangeBtn").addEventListener("click", () => shiftDateRange(-1));
@@ -2197,8 +2070,6 @@ ${selectedEmployees.reduce((html, _, index) => {
       document.getElementById("yearInput").addEventListener("change", applyMonthYearToRange);
       document.getElementById("departmentFilter").addEventListener("change", renderReport);
       document.getElementById("positionFilter").addEventListener("change", renderReport);
-      const reportSearch = document.getElementById("reportSearch");
-      if (reportSearch) reportSearch.addEventListener("input", renderReport);
 
       document.getElementById("saveEmployeeBtn").addEventListener("click", saveEmployee);
       document.getElementById("clearEmployeeFormBtn").addEventListener("click", clearEmployeeForm);
@@ -2218,7 +2089,6 @@ ${selectedEmployees.reduce((html, _, index) => {
       attachEvents();
       refreshAll();
 
-   
       setInterval(() => {
         if (document.visibilityState !== "visible") return;
 
@@ -2231,7 +2101,7 @@ ${selectedEmployees.reduce((html, _, index) => {
         }
 
         if (reportView && reportView.classList.contains("active")) {
-          Promise.all([refreshReport(), loadDtrRows()]).catch(function(err) { console.error(err); });
+          refreshReport().catch(function(err) { console.error(err); });
         }
       }, 15000);
     });
