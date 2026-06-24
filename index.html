@@ -1,411 +1,2584 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="keywords" content="jigar sable, portfolio, jigar, full stack dev, personal portfolio lifecodes, portfolio design, portfolio website, personal portfolio" />
-    <meta name="description" content="Welcome to Jigar's Portfolio. Full-Stack Web Developer and Android App Developer" />
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="./assets/css/style.css">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- Favicon -->
-    <link id='favicon' rel="shortcut icon" href="./assets/images/favicon.png" type="image/x-png">
-    <title>Portfolio | Ryan Ynion</title>
-</head>
-<body oncontextmenu="return false">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Executors - DTR QR System</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f7f8;
+      --panel: #ffffff;
+      --line: #dedede;
+      --line-soft: #eeeeee;
+      --text: #111827;
+      --muted: #667085;
+      --purple: #a21caf;
+      --purple-soft: #f7e8ff;
+      --blue: #2563eb;
+      --green: #15803d;
+      --red: #dc2626;
+      --orange: #e26d17;
+      --rail: #f1f3f6;
+      --header: #fafafa;
+      --hover: #f6f6f6;
+      --row-alt: #f4f4f4;
+    }
 
-<!-- pre loader -->
-<!-- <div class="loader-container">
-  <img draggable="false" src="./assets/images/preloader.gif" alt="">
-</div> -->
+    * { box-sizing: border-box; }
 
-<!-- navbar starts -->
-<header>
-        <a href="/" class="logo"><i class="fab fa-node-js"></i> Ryan</a>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      overflow: hidden;
+    }
 
-        <div id="menu" class="fas fa-bars"></div>
-        <nav class="navbar">
-            <ul>
-            <li><a class="active" href="#home">Home</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#skills">Skills</a></li>
-            <li><a href="#education">Education</a></li>
-            <li><a href="#work">Work</a></li>
-            <li><a href="#experience">Experience</a></li>
-            <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
-</header>
-<!-- navbar ends -->
+    button, input, select {
+      font-family: inherit;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    .rail {
+      background: var(--rail);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 7px 4px;
+      gap: 7px;
+    }
+
+    .rail-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid transparent;
+      border-radius: 5px;
+      background: transparent;
+      color: #293345;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .rail-btn:hover { background: #e7ebf2; }
+    .rail-btn.active {
+      background: #eef2ff;
+      border-color: #c7d2fe;
+      color: #4f46e5;
+    }
+
+    .main {
+      min-width: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--panel);
+    }
+
+    .titlebar {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line-soft);
+      padding: 0 12px;
+      background: #ffffff;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .brand-mark {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--purple);
+      border-radius: 5px;
+      position: relative;
+    }
+
+    .brand-mark::after {
+      content: "";
+      width: 6px;
+      height: 6px;
+      background: var(--purple);
+      border-radius: 50%;
+      position: absolute;
+      left: 4px;
+      top: 4px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      min-width: 30px;
+      height: 28px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 0 8px;
+    }
+
+    .icon-btn:hover { background: var(--hover); }
+
+    .view {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      background: var(--panel);
+    }
+
+    .view.active { display: flex; flex-direction: column; }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 30px 150px 150px 30px 1fr 330px 330px;
+      gap: 6px;
+      align-items: end;
+      padding: 8px 8px 6px 8px;
+      border-bottom: 1px solid var(--line-soft);
+      background: #fff;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .field label {
+      font-size: 11px;
+      color: #111;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .field input, .field select {
+      height: 25px;
+      border: 1px solid #d3d3d3;
+      border-radius: 3px;
+      padding: 2px 7px;
+      font-size: 13px;
+      background: #fdfdfd;
+      min-width: 0;
+    }
+
+    .range-btn {
+      height: 25px;
+      width: 28px;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 19px;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .month-year {
+      display: grid;
+      grid-template-columns: 1fr 120px;
+      gap: 6px;
+    }
+
+    .status-line {
+      min-height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 3px 9px;
+      font-size: 12px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line-soft);
+      background: #fff;
+    }
+
+    .status-line strong { color: #111827; }
+
+    .table-shell {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      background: #fff;
+      padding: 0 7px 8px 7px;
+    }
+
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      min-width: 1280px;
+      font-size: 12px;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      height: 30px;
+      background: var(--header);
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line-soft);
+      text-align: left;
+      padding: 0 8px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    thead th.center, tbody td.center { text-align: center; }
+
+    tbody td {
+      height: 37px;
+      border-bottom: 1px solid #e5e5e5;
+      border-right: 1px solid #f2f2f2;
+      padding: 0 8px;
+      white-space: nowrap;
+      vertical-align: middle;
+      background: #fff;
+    }
+
+    tbody tr:nth-child(even) td { background: var(--row-alt); }
+    tbody tr:hover td { background: #eef5ff; }
+
+    .col-num { width: 48px; text-align: center; color: #111; }
+    .col-name { min-width: 220px; max-width: 260px; }
+    .col-dept { min-width: 145px; max-width: 170px; }
+    .col-pos { min-width: 165px; max-width: 210px; }
+    .col-total { min-width: 95px; font-weight: 700; }
+    .date-col { min-width: 102px; text-align: center; }
+
+    .truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: block;
+    }
+
+    .time-cell {
+      font-weight: 700;
+      text-align: center;
+      color: #111;
+    }
+
+    .dash {
+      color: #222;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .orange-flag {
+      color: var(--orange);
+      font-weight: 700;
+      margin-right: 4px;
+    }
+
+    .panel {
+      padding: 16px;
+      overflow: auto;
+      background: #f8fafc;
+      flex: 1;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: minmax(360px, 440px) minmax(600px, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    /* Employee QR page: keep the form fixed while the Employees table scrolls */
+    #employeesView .panel {
+      overflow: hidden;
+    }
+
+    #employeesView .cards {
+      height: calc(100vh - 68px);
+      align-items: stretch;
+    }
+
+    #employeesView .cards > .card:first-child {
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    #employeesView .cards > .card:nth-child(2) {
+      height: 100%;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+    }
+
+    .card h2, .card h3 {
+      margin: 0 0 6px 0;
+      font-size: 18px;
+    }
+
+    .card p {
+      margin: 0 0 14px 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .form-grid .full { grid-column: 1 / -1; }
+
+    .form-field { display: flex; flex-direction: column; gap: 5px; }
+    .form-field label { font-size: 12px; font-weight: 700; }
+    .form-field input, .form-field select {
+      height: 34px;
+      border: 1px solid #d0d5dd;
+      border-radius: 5px;
+      padding: 6px 9px;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .btn {
+      border: 1px solid #111827;
+      background: #111827;
+      color: #fff;
+      border-radius: 5px;
+      height: 34px;
+      padding: 0 12px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .btn:hover { filter: brightness(0.95); }
+    .btn.secondary { background: #fff; color: #111827; border-color: #d0d5dd; }
+    .btn.green { background: var(--green); border-color: var(--green); }
+    .btn.red { background: var(--red); border-color: var(--red); }
+    .btn.purple { background: var(--purple); border-color: var(--purple); }
+
+    .message {
+      margin-top: 10px;
+      padding: 9px 10px;
+      border-radius: 5px;
+      border: 1px solid #d0d5dd;
+      background: #fff;
+      font-size: 13px;
+      color: var(--muted);
+      min-height: 34px;
+    }
+
+    .message.ok { color: var(--green); border-color: #bbf7d0; background: #f0fdf4; }
+    .message.err { color: var(--red); border-color: #fecaca; background: #fef2f2; }
+
+    .employee-table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      overflow: auto;
+      max-height: 580px;
+      background: #fff;
+    }
+
+    #employeesView .employee-table-wrap {
+      flex: 1;
+      min-height: 0;
+      max-height: none;
+    }
+
+    .small-table {
+      min-width: 800px;
+      font-size: 12px;
+    }
+
+    .small-table th, .small-table td {
+      height: 33px;
+      padding: 0 8px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .small-table th {
+      position: sticky;
+      top: 0;
+      background: #fafafa;
+      z-index: 2;
+    }
+
+    .qr-wrap {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      padding: 12px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+    }
+
+    .qr-box {
+      width: 170px;
+      height: 170px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      border: 1px solid #d0d5dd;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .qr-box img { width: 160px; height: 160px; display: block; }
+
+    .qr-text {
+      flex: 1;
+      min-width: 260px;
+      font-size: 12px;
+      color: var(--muted);
+      word-break: break-all;
+      line-height: 1.5;
+    }
+
+    .kiosk-shell {
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: #f8fafc;
+    }
+
+    .kiosk-card {
+      width: 100%;
+      max-width: 560px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      padding: 20px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    .kiosk-card h1 {
+      font-size: 24px;
+      margin: 0 0 6px 0;
+    }
+
+    .kiosk-card p {
+      color: var(--muted);
+      margin: 0 0 16px 0;
+      line-height: 1.5;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .action-btn {
+      height: 56px;
+      border-radius: 7px;
+      border: 1px solid #111827;
+      background: #111827;
+      color: #fff;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .action-btn:hover { filter: brightness(0.96); }
+
+    .empty-state {
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+    }
 
 
-<!-- hero section starts -->
-<section class="home" id="home">
-    <div id="particles-js"></div>
 
-    <div class="content">
-    <h2>Hi There,<br/> I'm Ryan <span>Ynion</span></h2>
-    <p>i am into <span class="typing-text"></span></p>
-    <a href="#about" class="btn"><span>About Me</span>
-      <i class="fas fa-arrow-circle-down"></i>
-    </a>
-    <div class="socials">
-        <ul class="social-icons">
-          <li><a class="linkedin" aria-label="LinkedIn" href="https://www.linkedin.com/in/jigar-sable/" target="_blank"><i class="fab fa-linkedin"></i></a></li> 
-          <li><a class="github" aria-label="GitHub" href="https://github.com/jigar-sable" target="_blank"><i class="fab fa-github"></i></a></li>
-          <li><a class="twitter" aria-label="Twitter" href="https://twitter.com/jigar_sable" target="_blank"><i class="fab fa-twitter"></i></a></li>
-          <li><a class="telegram" aria-label="Telegram" href="https://t.me/lifecode5" target="_blank"><i class="fab fa-telegram-plane"></i></a></li>
-          <li><a class="instagram" aria-label="Instagram" href="https://www.instagram.com/jigarsable.dev"><i class="fab fa-instagram" target="_blank"></i></a></li>
-          <li><a class="dev" aria-label="Dev" href="https://dev.to/jigarsable" target="_blank"><i class="fab fa-dev"></i></a></li>
-        </ul>
-      </div>
-    </div>
-<div class="image">
-    <img draggable="false" class="tilt" src="./assets/images/hero.png" alt="">
-</div>
-</section>
-<!-- hero section ends -->
+    .records-shell {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+    }
 
+    .records-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line-soft);
+      background: #fff;
+    }
 
-<!-- about section starts -->
-<section class="about" id="about">
-    <h2 class="heading"><i class="fas fa-user-alt"></i> About <span>Me</span></h2>
-    
-    <div class="row">
+    .records-search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 280px;
+      max-width: 520px;
+      flex: 1;
+    }
 
-    <div class="image">
-        <img draggable="false" class="tilt" src="./assets/images/profile2.jpg" alt="">
-    </div>
-    <div class="content">
-        <h3>I'm Jigar</h3>
-        <span class="tag">Full Stack Developer</span>
-        
-        <p>I am a Full-Stack developer based in Pune, India. 
-          I am an Information Technology undergraduate from SPPU.
-          I am very passionate about improving my coding skills & developing applications & websites.
-          I build WebApps and Websites using MERN Stack.
-          Working for myself to improve my skills.
-          Love to build Full-Stack clones. </p>
-        
-        <div class="box-container">
-            <!-- <div class="box">
-              <p><span> age: </span> 20</p>
-              <p><span> phone : </span> +91 XXX-XXX-XXXX</p>
-            </div> -->
-            <div class="box">
-              <p><span> email : </span> ynionryan@yahoo.com</p>
-              <p><span> place : </span> Dubai, United Arab Emirates</p>
-            </div>
-        </div>
-        
-        <div class="resumebtn">
-            <a href="https://drive.google.com/file/d/1rZiXl562q7aVyk1kJ2nO85YBAq8ixTiw/view" target="_blank" class="btn"><span>Resume</span>
-                <i class="fas fa-chevron-right"></i>
-            </a>
-        </div>
+    .records-search-wrap label {
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
 
-    </div>
-    </div>
-</section>
-<!-- about section ends -->
+    .records-search-wrap input {
+      width: 100%;
+      height: 30px;
+      border: 1px solid #d0d5dd;
+      border-radius: 5px;
+      padding: 5px 9px;
+      font-size: 13px;
+      background: #fff;
+    }
 
-<!-- skills section starts -->
-<section class="skills" id="skills">
+    .records-count {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
 
-    <h2 class="heading"><i class="fas fa-laptop-code"></i> Skills & <span>Abilities</span></h2>
+    .records-table-wrap {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 0 7px 8px 7px;
+      background: #fff;
+    }
 
-    <div class="container">
-          <div class="row" id="skillsContainer">
+    .records-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 30px;
+  background: #3f6f55;
+  color: #fff;
+  border-bottom: 1px solid #2f5c44;
+  border-right: 1px solid rgba(255,255,255,0.18);
+  text-align: left;
+  padding: 0 8px;
+  font-weight: 700;
+  white-space: nowrap;
+}
 
-            <!-- <div class="bar">
-              <div class="info">
-                <img src="https://img.icons8.com/color/48/000000/adobe-xd.png"/>
-                <span>AdobeXD</span>
-              </div>
-            </div> -->
+    .records-table {
+      min-width: 1180px;
+      width: 100%;
+      font-size: 12px;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
 
-      </div>
-</div>
-</section>
-<!-- skills section ends -->
-
-
-<!-- education section starts -->
-<section class="education" id="education">
-
-  <h1 class="heading"><i class="fas fa-graduation-cap"></i> My <span>Education</span></h1>
-
-    <p class="qoute">Education is not the learning of facts, but the training of the mind to think.</p>
-
-    <div class="box-container">
-
-    <div class="box">
-        <div class="image">
-        <img draggable="false" src="./assets/images/educat/college.jpg" alt="">
-        </div>
-        <div class="content">
-        <h3>Bachelor of Engineering in Information Technology</h3>
-        <p>Zeal College of engineering and research | SPPU</p>
-        <h4>2020-2024 | Pursuing</h4>
-        </div>
-    </div>
-
-    <div class="box">
-      <div class="image">
-      <img draggable="false" src="./assets/images/educat/school.jpg" alt="">
-      </div>
-      <div class="content">
-      <h3>HSC Science | Informatic Practices</h3>
-      <p>Shri  L. G. Haria Multipurpose School | CBSE</p>
-      <h4>2018-2020 | Completed</h4>
-      </div>
-    </div>
-
-</div>
-</section>
-<!-- education section ends -->
-
-
-<!-- work project section starts -->
-<section class="work" id="work">
-
-  <h2 class="heading"><i class="fas fa-laptop-code"></i> Projects <span>Made</span></h2>
-
-  <div class="box-container">
-
-    <!-- <div class="box tilt">
-      <img draggable="false" src="./assets/images/projects/portfolio1.PNG" alt="" />
-      <div class="content">
-        <div class="tag">
-        <h3>Portfolio Website</h3>
-        </div>
-        <div class="desc">
-          <p>Personal portfolio website. Don't need much info about it, just scroll down. You're here only!</p>
-          <div class="btns">
-            <a href="#" class="btn" target="_blank"><i class="fas fa-eye"></i> View</a>
-            <a href="https://github.com/jigar-sable/Portfolio-Website" class="btn" target="_blank">Code <i class="fas fa-code"></i></a>
-          </div>
-        </div>
-      </div>
-    </div> -->
-
-</div>
-
-<div class="viewall">
-  <a href="/projects" class="btn"><span>View All</span>
-    <i class="fas fa-arrow-right"></i>
-</a>
-</div>
-
-</section>
-<!-- work project section ends -->
-
-<!-- experience section starts -->
-<section class="experience" id="experience">
-
-  <h2 class="heading"><i class="fas fa-briefcase"></i> Experience </h2>
-
-  <div class="timeline">
-
-    <div class="container right">
-      <div class="content">
-        <div class="tag">
-          <h2>Self Employed</h2>
-        </div>
-        <div class="desc">
-            <h3>Full Stack Developer</h3>
-            <p>Oct 2021 - present</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="container left">
-      <div class="content">
-        <div class="tag">
-          <h2>Mapstreak Flyseas</h2>
-        </div>
-        <div class="desc">
-            <h3>Web Developer | Internship</h3>
-            <p>June 2021 - Dec 2021</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="container right">
-      <div class="content">
-        <div class="tag">
-          <h2>The Spark Foundation</h2>
-        </div>
-        <div class="desc">
-            <h3>Website Developer | Internship</h3>
-            <p>May 2021 - June 2021</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="container left">
-      <div class="content">
-        <div class="tag">
-          <h2>The Spark Foundation</h2>
-        </div>
-        <div class="desc">
-            <h3>Mobile Application Developer | Internship</h3>
-            <p>April 2021 - May 2021</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="container right">
-      <div class="content">
-        <div class="tag">
-          <h2>Frshr Technologies</h2>
-        </div>
-        <div class="desc">
-            <h3>Wordpress Developer | Internship</h3>
-            <p>April 2021 - April 2021</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="container left">
-      <div class="content">
-        <div class="tag">
-          <h2>WonderingBlog</h2>
-        </div>
-        <div class="desc">
-            <h3>Web Development & SEO | Internship</h3>
-            <p>March 2021 - April 2021</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="morebtn">
-    <a href="/experience" class="btn"><span>View All</span>
-      <i class="fas fa-arrow-right"></i>
-  </a>
-  </div>
-
-</div>
-
-</section>
-<!-- experience section ends -->
-
-<!-- contact section starts -->
-<section class="contact" id="contact">
+    .records-table th {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      height: 30px;
+      background: #3f6f55;
+      color: #fff;
+      border-bottom: 1px solid #2f5c44;
+      border-right: 1px solid rgba(255,255,255,0.18);
+      text-align: left;
+      padding: 0 8px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
   
-  <h2 class="heading"><i class="fas fa-headset"></i> Get in <span>Touch</span></h2>
+    .records-table td {
+      height: 32px;
+      border-bottom: 1px solid #e5e5e5;
+      border-right: 1px solid #f2f2f2;
+      padding: 0 8px;
+      white-space: nowrap;
+      vertical-align: middle;
+      background: #fff;
+    }
 
-  <div class="container">
-    <div class="content">
-      <div class="image-box">
-        <img draggable="false" src="./assets/images/contact1.png" alt="">
+    .records-table tr:nth-child(even) td { background: #f4f4f4; }
+    .records-table tr:hover td { background: #eef5ff; }
+
+    .records-table .center { text-align: center; }
+    .records-table .strong { font-weight: 700; }
+
+    @media (max-width: 1100px) {
+      .filters {
+        grid-template-columns: 30px 1fr 1fr 30px;
+      }
+      .month-year, .field.wide { grid-column: span 2; }
+      .cards { grid-template-columns: 1fr; }
+    }
+
+
+
+    .schedule-editor {
+      grid-column: 1 / -1;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfbfc;
+      padding: 8px;
+      margin-top: 2px;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    .schedule-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 7px;
+      flex-wrap: nowrap;
+    }
+
+    .schedule-title-row strong {
+      font-size: 12px;
+      flex: 0 0 auto;
+    }
+
+    .schedule-note {
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.25;
+      text-align: right;
+      flex: 1 1 auto;
+    }
+
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+      width: 100%;
+    }
+
+    .schedule-day {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      padding: 6px;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .day-check-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 700;
+      font-size: 11.5px;
+      margin-bottom: 5px;
+      white-space: nowrap;
+    }
+
+    .day-check-row input {
+      width: 13px;
+      height: 13px;
+      margin: 0;
+      accent-color: var(--purple);
+      flex: 0 0 auto;
+    }
+
+    .schedule-day select {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      height: 27px;
+      font-size: 11px;
+      padding: 3px 4px;
+      display: block;
+    }
+
+    .schedule-duty {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.2;
+      min-height: 32px;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .schedule-day.disabled {
+      background: #f4f4f5;
+      color: var(--muted);
+    }
+
+    .schedule-day.disabled select {
+      opacity: 0.55;
+    }
+
+    @media (max-width: 700px) {
+      .app { grid-template-columns: 42px 1fr; }
+      .filters { grid-template-columns: 1fr 1fr; }
+      .range-btn { display: none; }
+      .month-year, .field.wide { grid-column: span 2; }
+      .action-grid { grid-template-columns: 1fr; }
+      .schedule-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #employeesView .panel { overflow: auto; }
+      #employeesView .cards { height: auto; }
+    }
+
+/* === Minimalist Modern UI refresh === */
+:root {
+  --bg: #FAFAFA;
+  --panel: #FFFFFF;
+  --line: #E2E8F0;
+  --line-soft: #EEF2F7;
+  --text: #0F172A;
+  --muted: #64748B;
+  --purple: #0052FF;
+  --purple-soft: rgba(0, 82, 255, 0.08);
+  --blue: #0052FF;
+  --green: #16A34A;
+  --red: #DC2626;
+  --orange: #F97316;
+  --rail: #0F172A;
+  --header: #F8FAFC;
+  --hover: #F1F5F9;
+  --row-alt: #F8FAFC;
+  --accent: #0052FF;
+  --accent-2: #4D7CFF;
+  --card-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+  --accent-shadow: 0 10px 26px rgba(0, 82, 255, 0.22);
+}
+
+html, body {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 15% 5%, rgba(0, 82, 255, 0.08), transparent 30%),
+    radial-gradient(circle at 90% 0%, rgba(77, 124, 255, 0.10), transparent 28%),
+    var(--bg);
+}
+
+.app {
+  grid-template-columns: 64px 1fr;
+}
+
+.rail {
+  background:
+    radial-gradient(circle at top, rgba(77, 124, 255, 0.28), transparent 34%),
+    #0F172A;
+  border-right: 0;
+  padding: 14px 8px;
+  gap: 10px;
+  box-shadow: 12px 0 30px rgba(15, 23, 42, 0.12);
+}
+
+.rail-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  color: rgba(255,255,255,0.72);
+  font-size: 17px;
+  transition: transform .18s ease, background .18s ease, color .18s ease, box-shadow .18s ease;
+}
+
+.rail-btn:hover {
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.rail-btn.active {
+  color: #fff;
+  border-color: rgba(255,255,255,0.18);
+  background: linear-gradient(135deg, #0052FF, #4D7CFF);
+  box-shadow: 0 12px 28px rgba(0, 82, 255, 0.35);
+}
+
+.main {
+  background: transparent;
+}
+
+.titlebar {
+  height: 56px;
+  padding: 0 18px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(14px);
+}
+
+.brand {
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.brand-mark {
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0052FF, #4D7CFF);
+  box-shadow: 0 10px 24px rgba(0, 82, 255, 0.28);
+}
+
+.brand-mark::after {
+  background: #fff;
+  opacity: .95;
+}
+
+.icon-btn, .btn, .range-btn {
+  border-radius: 12px;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
+}
+
+.icon-btn {
+  height: 34px;
+  border-color: var(--line);
+  color: var(--text);
+  font-weight: 700;
+  background: rgba(255,255,255,0.9);
+}
+
+.icon-btn:hover, .range-btn:hover {
+  border-color: rgba(0, 82, 255, 0.22);
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(15,23,42,.08);
+  transform: translateY(-1px);
+}
+
+#printBtn {
+  color: #fff;
+  border: 0;
+  background: linear-gradient(135deg, #0052FF, #4D7CFF);
+  box-shadow: var(--accent-shadow);
+}
+
+.filters {
+  margin: 14px 14px 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255,255,255,0.88);
+  box-shadow: 0 10px 30px rgba(15,23,42,.05);
+}
+
+.field label,
+.records-search-wrap label,
+.report-search-wrap label {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.field input, .field select,
+.records-search-wrap input,
+.report-search-wrap input,
+.form-field input, .form-field select {
+  border-color: var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text);
+  outline: none;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.field input:focus, .field select:focus,
+.records-search-wrap input:focus,
+.report-search-wrap input:focus,
+.form-field input:focus, .form-field select:focus {
+  border-color: rgba(0, 82, 255, 0.55);
+  box-shadow: 0 0 0 4px rgba(0, 82, 255, 0.10);
+}
+
+.status-line,
+.records-toolbar {
+  margin: 10px 14px 0;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255,255,255,.9);
+  box-shadow: 0 10px 28px rgba(15,23,42,.04);
+}
+
+.table-shell,
+.records-table-wrap {
+  margin: 12px 14px 14px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: var(--card-shadow);
+}
+
+table {
+  font-size: 12.5px;
+}
+
+thead th,
+.records-table thead th,
+.records-table th {
+  top: 0;
+  height: 38px;
+  background: #0F172A;
+  color: #fff;
+  border-right: 1px solid rgba(255,255,255,.12);
+  border-bottom: 0;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+tbody td,
+.records-table td {
+  height: 42px;
+  border-right: 1px solid #EEF2F7;
+  border-bottom: 1px solid #EEF2F7;
+}
+
+tbody tr:nth-child(even) td,
+.records-table tr:nth-child(even) td {
+  background: #F8FAFC;
+}
+
+tbody tr:hover td,
+.records-table tr:hover td {
+  background: rgba(0, 82, 255, 0.06);
+}
+
+.time-cell,
+.records-table .strong {
+  color: var(--text);
+}
+
+.records-shell {
+  background:
+    radial-gradient(circle at 12% 4%, rgba(0, 82, 255, 0.08), transparent 28%),
+    var(--bg);
+  padding: 0;
+}
+
+.records-toolbar {
+  padding: 12px 14px;
+  border-radius: 20px;
+}
+
+.records-search-wrap input {
+  height: 40px;
+  max-width: 520px;
+}
+
+.records-count {
+  font-family: "JetBrains Mono", monospace;
+  color: var(--accent);
+  font-weight: 700;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(0,82,255,.08);
+}
+
+.records-table {
+  min-width: 1320px;
+}
+
+.records-table .date-cell,
+.records-table .date-head {
+  min-width: 118px;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+}
+
+.card {
+  border-color: var(--line);
+  border-radius: 22px;
+  box-shadow: var(--card-shadow);
+}
+
+.card h2, .card h3 {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.btn {
+  border: 0;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #0052FF, #4D7CFF);
+  box-shadow: 0 8px 18px rgba(0, 82, 255, 0.20);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(0, 82, 255, 0.28);
+}
+
+.btn.secondary {
+  background: #fff;
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+
+.btn.green {
+  background: linear-gradient(135deg, #16A34A, #22C55E);
+}
+
+.btn.red {
+  background: linear-gradient(135deg, #DC2626, #F43F5E);
+}
+
+.btn.purple {
+  background: linear-gradient(135deg, #0052FF, #4D7CFF);
+}
+
+
+
+.report-status-line {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(280px, 430px) auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.report-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.report-search-wrap label {
+  color: #0F172A;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  white-space: nowrap;
+}
+
+.report-search-wrap input {
+  width: 100%;
+  height: 34px;
+  border: 1px solid #E2E8F0;
+  border-radius: 13px;
+  padding: 6px 12px;
+  font-size: 13px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.report-search-wrap input:focus {
+  outline: 2px solid rgba(0, 82, 255, 0.18);
+  border-color: #0052FF;
+}
+
+.report-counts {
+  text-align: right;
+  white-space: nowrap;
+  color: #64748B;
+}
+
+.select-col {
+  width: 42px;
+  min-width: 42px;
+  text-align: center;
+}
+
+.select-col input {
+  width: 15px;
+  height: 15px;
+  accent-color: #0052FF;
+  cursor: pointer;
+}
+
+.export-btn {
+  gap: 7px;
+  background: linear-gradient(135deg, #0052FF, #4D7CFF) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 8px 18px rgba(0, 82, 255, 0.22);
+  font-weight: 800;
+}
+
+.export-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(0, 82, 255, 0.30);
+}
+
+.export-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.dtr-print-root { display: none; }
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: 52px 1fr; }
+  .rail-btn { width: 36px; height: 36px; border-radius: 12px; }
+  .filters, .status-line, .records-toolbar, .table-shell, .records-table-wrap { margin-left: 8px; margin-right: 8px; }
+  .report-status-line { grid-template-columns: 1fr; gap: 8px; }
+}
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="rail">
+      <button class="rail-btn active" id="reportNav" title="Executors report">⌂</button>
+      <button class="rail-btn" id="employeesNav" title="Employees and QR">▣</button>
+      <button class="rail-btn" id="kioskNav" title="DTR records">☷</button>
+    </aside>
+
+    <main class="main">
+      <div class="titlebar">
+        <div class="brand"><span class="brand-mark"></span><span id="pageTitle">Executors</span></div>
+        <div class="top-actions">
+          <button class="icon-btn" id="openDriveBtn" title="Employee QR Codes Drive folder">QR Drive</button>
+          <button class="icon-btn export-btn" id="printBtn" title="Export selected DTR"><span class="export-icon">⧉</span><span>Export DTR</span></button>
+        </div>
       </div>
-    <form id="contact-form">
-      
-      <div class="form-group">
-        <div class="field">
-          <input type="text" name="name" placeholder="Name" required>
-          <i class='fas fa-user'></i>
-        </div>
-        <div class="field">
-          <input type="text" name="email" placeholder="Email" required>
-          <i class='fas fa-envelope'></i>
-        </div>
-        <div class="field">
-          <input type="text" name="phone" placeholder="Phone">
-          <i class='fas fa-phone-alt'></i>
-        </div>
-        <div class="message">
-        <textarea placeholder="Message" name="message" required></textarea>
-        <i class="fas fa-comment-dots"></i>
-        </div>
-        </div>
-      <div class="button-area">
-        <button type="submit">
-          Submit <i class="fa fa-paper-plane"></i></button>
-      </div>
-    </form>
-  </div>
-  </div>
-</section>
-<!-- contact section ends -->
 
+      <section id="reportView" class="view active">
+        <div class="filters">
+          <button class="range-btn" id="prevRangeBtn" title="Previous date range">←</button>
 
-<!-- footer section starts -->
-<section class="footer">
-
-  <div class="box-container">
-
-      <div class="box">
-          <h3>Ryan's Portfolio</h3>
-          <p>Thank you for visiting my personal portfolio website. Connect with me over socials. <br/> <br/> Keep Rising 🚀. Connect with me over live chat!</p>
-      </div>
-
-      <div class="box">
-          <h3>quick links</h3>
-          <a href="#home"><i class="fas fa-chevron-circle-right"></i> home</a>
-          <a href="#about"><i class="fas fa-chevron-circle-right"></i> about</a>
-          <a href="#skills"><i class="fas fa-chevron-circle-right"></i> skills</a>
-          <a href="#education"><i class="fas fa-chevron-circle-right"></i> education</a>
-          <a href="#work"><i class="fas fa-chevron-circle-right"></i> work</a>
-          <a href="#experience"><i class="fas fa-chevron-circle-right"></i> experience</a>
-      </div>
-
-      <div class="box">
-          <h3>contact info</h3>
-          <p> <i class="fas fa-phone"></i>+91 XXX-XXX-XXXX</p>
-          <p> <i class="fas fa-envelope"></i>ynionryan@yahoo.com</p>
-          <p> <i class="fas fa-map-marked-alt"></i>Dubai, United Arab Emirates</p>
-          <div class="share">
-
-              <a href="https://www.linkedin.com/in/jigar-sable" class="fab fa-linkedin" aria-label="LinkedIn" target="_blank"></a>
-              <a href="https://github.com/jigar-sable" class="fab fa-github" aria-label="GitHub" target="_blank"></a>
-              <a href="mailto:jigarsable21@gmail.com" class="fas fa-envelope" aria-label="Mail" target="_blank"></a>
-              <a href="https://twitter.com/jigar_sable" class="fab fa-twitter" aria-label="Twitter" target="_blank"></a>
-              <a href="https://t.me/lifecode5" class="fab fa-telegram-plane" aria-label="Telegram" target="_blank"></a>
+          <div class="field">
+            <label for="fromDate">From date</label>
+            <input type="date" id="fromDate" />
           </div>
-      </div>
+
+          <div class="field">
+            <label for="toDate">To Date</label>
+            <input type="date" id="toDate" />
+          </div>
+
+          <button class="range-btn" id="nextRangeBtn" title="Next date range">→</button>
+
+          <div class="month-year">
+            <div class="field">
+              <label for="monthSelect">Month</label>
+              <select id="monthSelect"></select>
+            </div>
+            <div class="field">
+              <label for="yearInput">Year</label>
+              <input type="number" id="yearInput" min="2000" max="2100" />
+            </div>
+          </div>
+
+          <div class="field wide">
+            <label for="departmentFilter">Departments</label>
+            <select id="departmentFilter"></select>
+          </div>
+
+          <div class="field wide">
+            <label for="positionFilter">Positions</label>
+            <select id="positionFilter"></select>
+          </div>
+        </div>
+
+        <div class="status-line report-status-line">
+          <div id="reportStatus">Loading...</div>
+          <div class="report-search-wrap">
+            <label for="reportSearch">Search</label>
+            <input id="reportSearch" placeholder="Search employee, department, or position" />
+          </div>
+          <div class="report-counts">
+            <strong id="selectedCount">0</strong> selected · <strong id="employeeCount">0</strong> employees
+          </div>
+        </div>
+
+        <div class="table-shell">
+          <table id="reportTable">
+            <thead id="reportHead"></thead>
+            <tbody id="reportBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="employeesView" class="view">
+        <div class="panel">
+          <div class="cards">
+            <div class="card">
+              <h2>Employee QR Codes</h2>
+              <p>Add employees here. When you save an employee, Apps Script will also create the QR PNG file inside the Drive folder named <strong>Employee QR Codes</strong>.</p>
+
+              <div class="form-grid">
+                <div class="form-field">
+                  <label for="empCode">Code</label>
+                  <input id="empCode" placeholder="201" />
+                </div>
+                <div class="form-field">
+                  <label for="empName">Name</label>
+                  <input id="empName" placeholder="Employee name" />
+                </div>
+                <div class="form-field">
+                  <label for="empDepartment">Department</label>
+                  <input id="empDepartment" placeholder="Decoration section" />
+                </div>
+                <div class="form-field">
+                  <label for="empPosition">Position</label>
+                  <input id="empPosition" placeholder="Position" />
+                </div>
+                <div class="form-field">
+                  <label for="empShift">Shift</label>
+                  <select id="empShift">
+                    <option value="morning">Morning</option>
+                    <option value="afternoon">Afternoon</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label>Duty time</label>
+                  <input id="dutySummary" readonly value="Morning: 8hrs 7:00 AM - 4:00 PM / 12hrs 7:00 AM - 7:00 PM" />
+                </div>
+                <div class="schedule-editor">
+                  <div class="schedule-title-row">
+                    <strong>Schedule</strong>
+                    <div class="schedule-note">Tick working days from Monday to Sunday, then select 8 hrs or 12 hrs.</div>
+                  </div>
+                  <div id="scheduleGrid" class="schedule-grid"></div>
+                </div>
+              </div>
+
+              <div class="btn-row">
+                <button class="btn purple" id="saveEmployeeBtn">Save Employee + Generate QR</button>
+                <button class="btn secondary" id="clearEmployeeFormBtn">Clear</button>
+                <button class="btn green" id="generateAllQrBtn">Generate All QRs</button>
+              </div>
+
+              <div id="employeeMessage" class="message">Ready.</div>
+
+              <div class="qr-wrap">
+                <div class="qr-box" id="qrBox"><span style="color:#98a2b3;font-size:12px;">Select employee</span></div>
+                <div class="qr-text">
+                  <strong id="qrName">No employee selected</strong><br />
+                  <span id="qrCodeText"></span><br />
+                  <span id="qrUrlText"></span>
+                  <div class="btn-row">
+                    <button class="btn secondary" id="downloadQrBtn">Download QR</button>
+                    <button class="btn secondary" id="saveQrBtn">Save QR to Drive</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Employees</h3>
+              <p>Click Preview to show the employee QR code. Click Edit to load the employee into the form.</p>
+              <div class="employee-table-wrap">
+                <table class="small-table">
+                  <thead>
+                    <tr>
+                      <th style="width:50px;">#</th>
+                      <th>Code</th>
+                      <th>Name</th>
+                      <th>Department</th>
+                      <th>Position</th>
+                      <th style="width:200px;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="employeeTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="kioskView" class="view">
+        <div class="records-shell">
+          <div class="records-toolbar">
+            <div class="records-search-wrap">
+              <label for="dtrSearch">Search</label>
+              <input id="dtrSearch" placeholder="Search employee, department, position, action, or time" />
+            </div>
+            <div id="dtrRecordCount" class="records-count">0 record(s)</div>
+          </div>
+
+          <div class="records-table-wrap">
+            <table class="records-table">
+              <thead>
+                <tr>
+                  <th class="date-head">Date</th>
+                  <th>Employee Name</th>
+                  <th>Department</th>
+                  <th>Position</th>
+                  <th class="center">Arrival</th>
+                  <th class="center">Break Start</th>
+                  <th class="center">Short Break Start</th>
+                  <th class="center">Break End</th>
+                  <th class="center">Short Break End</th>
+                  <th class="center">Departure</th>
+                  <th>Last Action</th>
+                  <th class="center">Work Hours</th>
+                </tr>
+              </thead>
+              <tbody id="dtrRecordsBody">
+                <tr><td colspan="12" class="empty-state">Loading DTR records...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 
-  <h1 class="credit">Designed with <i class="fa fa-heart pulse"></i> by <a href="https://www.linkedin.com/in/jigar-sable"> Ryan Ynion</a></h1>
+  <script>
+    const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzMzFmREpMCZ2m9t1k0Aip4cBVswPDJe_80sUw4MioHSUSnQpp8LOLzfsM-fPkxLf4Qww/exec";
+    const QR_DRIVE_URL = "https://drive.google.com/drive/u/0/folders/1-y4dtzfTNQnF1Mj8RuJdWxhAY7ewLHSy";
+    const KIOSK_URL = "https://decosite.github.io/kioskdtr/index.html";
 
-</section>
-<!-- footer section ends -->
+    const state = {
+      employees: [],
+      reportRows: [],
+      dtrRows: [],
+      selectedReportCodes: new Set(),
+      selectedQrEmployee: null,
+      currentQrDataUrl: "",
+      loading: false
+    };
+
+    const monthNames = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
 
 
-<!-- scroll top btn -->
-<a href="#home" aria-label="ScrollTop" class="fas fa-angle-up" id="scroll-top"></a>
-<!-- scroll back to top -->
+    const scheduleDays = [
+      { key: "M", label: "Mon" },
+      { key: "T", label: "Tue" },
+      { key: "W", label: "Wed" },
+      { key: "TH", label: "Thu" },
+      { key: "F", label: "Fri" },
+      { key: "Sa", label: "Sat" },
+      { key: "Su", label: "Sun" }
+    ];
 
+    let scheduleState = defaultScheduleState();
 
-<!-- ==== ALL MAJOR JAVASCRIPT CDNS STARTS ==== -->
-<!-- jquery cdn -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    function defaultScheduleState() {
+      return {
+        M:  { active: true,  hrs: 8 },
+        T:  { active: true,  hrs: 8 },
+        W:  { active: true,  hrs: 8 },
+        TH: { active: true,  hrs: 8 },
+        F:  { active: true,  hrs: 8 },
+        Sa: { active: false, hrs: 8 },
+        Su: { active: false, hrs: 8 }
+      };
+    }
 
-<!-- typed.js cdn -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.5/typed.min.js" integrity="sha512-1KbKusm/hAtkX5FScVR5G36wodIMnVd/aP04af06iyQTkD17szAMGNmxfNH+tEuFp3Og/P5G32L1qEC47CZbUQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    function dutyRange(shift, hrs) {
+      const h = Number(hrs) === 12 ? 12 : 8;
+      if (shift === "afternoon") {
+        return h === 12 ? "7:00 PM - 7:00 AM" : "7:00 PM - 4:00 AM";
+      }
+      return h === 12 ? "7:00 AM - 7:00 PM" : "7:00 AM - 4:00 PM";
+    }
 
-<!-- particle.js links -->
-<script src="./assets/js/particles.min.js"></script>
-<script src="./assets/js/app.js"></script>
+    function updateDutySummary() {
+      const shift = document.getElementById("empShift")?.value || "morning";
+      const label = shift === "afternoon" ? "Afternoon" : "Morning";
+      const summary = `${label}: 8hrs ${dutyRange(shift, 8)} / 12hrs ${dutyRange(shift, 12)}`;
+      const input = document.getElementById("dutySummary");
+      if (input) input.value = summary;
 
-<!-- vanilla tilt.js links -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js" integrity="sha512-SttpKhJqONuBVxbRcuH0wezjuX+BoFoli0yPsnrAADcHsQMW8rkR84ItFHGIkPvhnlRnE2FaifDOUw+EltbuHg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+      document.querySelectorAll(".schedule-duty").forEach(el => {
+        const day = el.dataset.day;
+        const dayState = scheduleState[day] || { active: false, hrs: 8 };
+        el.textContent = dayState.active ? dutyRange(shift, dayState.hrs) : "Day off";
+      });
+    }
 
-<!-- scroll reveal anim -->
-<script src="https://unpkg.com/scrollreveal"></script>
+    function renderScheduleEditor() {
+      const grid = document.getElementById("scheduleGrid");
+      if (!grid) return;
+      const shift = document.getElementById("empShift")?.value || "morning";
+      grid.innerHTML = scheduleDays.map(day => {
+        const d = scheduleState[day.key] || { active: false, hrs: 8 };
+        const disabled = d.active ? "" : "disabled";
+        return `
+          <div class="schedule-day ${disabled}">
+            <label class="day-check-row">
+              <input type="checkbox" ${d.active ? "checked" : ""} onchange="toggleScheduleDay('${day.key}', this.checked)">
+              <span>${day.label}</span>
+            </label>
+            <select onchange="setSchedulehrs('${day.key}', this.value)" ${d.active ? "" : "disabled"}>
+              <option value="8" ${Number(d.hrs) === 8 ? "selected" : ""}>8 hrs</option>
+              <option value="12" ${Number(d.hrs) === 12 ? "selected" : ""}>12 hrs</option>
+            </select>
+            <div class="schedule-duty" data-day="${day.key}">${d.active ? dutyRange(shift, d.hrs) : "Day off"}</div>
+          </div>`;
+      }).join("");
+      updateDutySummary();
+    }
 
-<script
-      type="text/javascript"
-      src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"
-    ></script>
+    function toggleScheduleDay(day, checked) {
+      if (!scheduleState[day]) scheduleState[day] = { active: false, hrs: 8 };
+      scheduleState[day].active = !!checked;
+      renderScheduleEditor();
+    }
 
-<!-- ==== ALL MAJOR JAVASCRIPT CDNS ENDS ==== -->
+    function setSchedulehrs(day, value) {
+      if (!scheduleState[day]) scheduleState[day] = { active: true, hrs: 8 };
+      scheduleState[day].hrs = Number(value) === 12 ? 12 : 8;
+      updateDutySummary();
+    }
 
-<script src="./assets/js/script.js"></script>
+    function buildScheduleString() {
+      return scheduleDays
+        .filter(day => scheduleState[day.key] && scheduleState[day.key].active)
+        .map(day => `${day.key}:${Number(scheduleState[day.key].hrs) === 12 ? 12 : 8}hrs`)
+        .join(", ");
+    }
 
+    function parseScheduleString(schedule) {
+      const parsed = defaultScheduleState();
+      Object.keys(parsed).forEach(day => parsed[day].active = false);
+
+      String(schedule || "").split(",").forEach(part => {
+        const match = part.trim().match(/^(M|T|W|TH|F|Sa|Su)\s*:\s*(8|12)\s*hrs?/i);
+        if (!match) return;
+        const key = scheduleDays.find(d => d.key.toLowerCase() === match[1].toLowerCase())?.key;
+        if (!key) return;
+        parsed[key] = { active: true, hrs: Number(match[2]) };
+      });
+
+      if (!schedule || !schedule.trim()) return defaultScheduleState();
+      return parsed;
+    }
+
+    function pad(n) { return String(n).padStart(2, "0"); }
+
+    function isoDate(date) {
+      return date.getFullYear() + "-" + pad(date.getMonth() + 1) + "-" + pad(date.getDate());
+    }
+
+    function todayIso() { return isoDate(new Date()); }
+
+    function parseIso(iso) {
+      const parts = String(iso || "").split("-").map(Number);
+      return new Date(parts[0], (parts[1] || 1) - 1, parts[2] || 1);
+    }
+
+    function addDays(date, days) {
+      const d = new Date(date);
+      d.setDate(d.getDate() + days);
+      return d;
+    }
+
+    function dateRange(from, to) {
+      const dates = [];
+      let cur = parseIso(from);
+      const end = parseIso(to);
+      while (cur <= end) {
+        dates.push(isoDate(cur));
+        cur = addDays(cur, 1);
+      }
+      return dates;
+    }
+
+    function minutesToHMS(mins) {
+      mins = Number(mins || 0);
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      return pad(h) + ":" + pad(m) + ":00";
+    }
+
+    function formatDateHead(iso) {
+      const d = parseIso(iso);
+      return pad(d.getDate()) + " " + monthNames[d.getMonth()].toUpperCase();
+    }
+
+    function currentTime() {
+      const d = new Date();
+      return pad(d.getHours()) + ":" + pad(d.getMinutes());
+    }
+
+    function setMessage(id, message, type) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = message || "";
+      el.classList.remove("ok", "err");
+      if (type) el.classList.add(type);
+    }
+
+    function jsonpRequest(params) {
+      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
+        return Promise.reject(new Error("Apps Script URL is not configured."));
+      }
+
+      return new Promise((resolve, reject) => {
+        const callbackName = "__dtr_cb_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+        const script = document.createElement("script");
+        const timeout = setTimeout(() => {
+          cleanup();
+          reject(new Error("Apps Script request timed out."));
+        }, 30000);
+
+        function cleanup() {
+          clearTimeout(timeout);
+          try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
+          if (script.parentNode) script.parentNode.removeChild(script);
+        }
+
+        window[callbackName] = function (data) {
+          cleanup();
+          resolve(data || {});
+        };
+
+        const query = new URLSearchParams({ ...params, callback: callbackName, _: Date.now() });
+        script.onerror = function () {
+          cleanup();
+          reject(new Error("Could not connect to Apps Script."));
+        };
+        script.src = GOOGLE_SHEET_URL + "?" + query.toString();
+        document.body.appendChild(script);
+      });
+    }
+
+    function sendData(payload) {
+      return jsonpRequest({ data: JSON.stringify(payload) });
+    }
+
+    function setupMonthOptions() {
+      const select = document.getElementById("monthSelect");
+      select.innerHTML = monthNames.map((name, index) => `<option value="${index + 1}">${name}</option>`).join("");
+    }
+
+    function setDefaultDates() {
+      const now = new Date();
+      const from = addDays(now, -7);
+      document.getElementById("fromDate").value = isoDate(from);
+      document.getElementById("toDate").value = isoDate(now);
+      document.getElementById("monthSelect").value = String(now.getMonth() + 1);
+      document.getElementById("yearInput").value = String(now.getFullYear());
+    }
+
+    function syncMonthYearFromFromDate() {
+      const from = parseIso(document.getElementById("fromDate").value || todayIso());
+      document.getElementById("monthSelect").value = String(from.getMonth() + 1);
+      document.getElementById("yearInput").value = String(from.getFullYear());
+    }
+
+    function applyMonthYearToRange() {
+      const month = Number(document.getElementById("monthSelect").value);
+      const year = Number(document.getElementById("yearInput").value);
+      if (!month || !year) return;
+      const first = new Date(year, month - 1, 1);
+      const last = new Date(year, month, 0);
+      document.getElementById("fromDate").value = isoDate(first);
+      document.getElementById("toDate").value = isoDate(last);
+      refreshReport();
+    }
+
+    function shiftDateRange(direction) {
+      const fromInput = document.getElementById("fromDate");
+      const toInput = document.getElementById("toDate");
+      const from = parseIso(fromInput.value);
+      const to = parseIso(toInput.value);
+      const days = Math.max(1, Math.round((to - from) / 86400000) + 1);
+      fromInput.value = isoDate(addDays(from, direction * days));
+      toInput.value = isoDate(addDays(to, direction * days));
+      syncMonthYearFromFromDate();
+      refreshReport();
+    }
+
+    async function loadEmployees() {
+      const data = await jsonpRequest({ action: "getEmployees", date: todayIso() });
+      if (!data.ok) throw new Error(data.error || "Could not load employees.");
+      state.employees = data.employees || [];
+      renderEmployeeTable();
+      populateFilters();
+      return data;
+    }
+
+    async function loadReport() {
+      const from = document.getElementById("fromDate").value;
+      const to = document.getElementById("toDate").value;
+      const data = await jsonpRequest({ action: "getReport", from, to });
+      if (!data.ok) throw new Error(data.error || "Could not load report.");
+      state.reportRows = data.rows || [];
+      renderReport();
+      return data;
+    }
+
+    async function loadDtrRows() {
+      const data = await jsonpRequest({ action: "getDtrRows" });
+      if (!data.ok) throw new Error(data.error || "Could not load DTR records.");
+      state.dtrRows = data.rows || [];
+      renderDtrRecords();
+      return data;
+    }
+
+    async function refreshAll() {
+      try {
+        state.loading = true;
+        document.getElementById("reportStatus").textContent = "Loading...";
+        await loadEmployees();
+        await loadReport();
+        await loadDtrRows();
+        handleUrlKiosk();
+      } catch (err) {
+        document.getElementById("reportStatus").textContent = err.message;
+        setMessage("employeeMessage", err.message, "err");
+      } finally {
+        state.loading = false;
+      }
+    }
+
+    async function refreshReport() {
+      try {
+        document.getElementById("reportStatus").textContent = "Loading...";
+        await loadReport();
+      } catch (err) {
+        document.getElementById("reportStatus").textContent = err.message;
+      }
+    }
+
+    function uniqueSorted(values) {
+      return [...new Set(values.map(v => String(v || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    }
+
+    function populateFilters() {
+      const deptSelect = document.getElementById("departmentFilter");
+      const posSelect = document.getElementById("positionFilter");
+      const currentDept = deptSelect.value;
+      const currentPos = posSelect.value;
+
+      const departments = uniqueSorted([
+        ...state.employees.map(e => e.department),
+        ...state.reportRows.map(r => r.dept)
+      ]);
+      const positions = uniqueSorted([
+        ...state.employees.map(e => e.position),
+        ...state.reportRows.map(r => r.pos)
+      ]);
+
+      deptSelect.innerHTML = `<option value="">All departments</option>` + departments.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
+      posSelect.innerHTML = `<option value="">All positions</option>` + positions.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
+
+      if (departments.includes(currentDept)) deptSelect.value = currentDept;
+      if (positions.includes(currentPos)) posSelect.value = currentPos;
+    }
+
+    function buildReportRows() {
+      const from = document.getElementById("fromDate").value;
+      const to = document.getElementById("toDate").value;
+      const dates = dateRange(from, to);
+      const dept = document.getElementById("departmentFilter").value;
+      const pos = document.getElementById("positionFilter").value;
+      const map = {};
+
+      // Employees sheet is the master data for Name, Department, and Position.
+      // DTR rows may contain old department/position values, so they should not overwrite Employees data.
+      state.employees.forEach(emp => {
+        const key = String(emp.code || "").toUpperCase();
+        if (!key) return;
+        map[key] = {
+          code: emp.code,
+          name: emp.name,
+          department: emp.department,
+          position: emp.position,
+          fromEmployees: true,
+          days: {},
+          total: 0
+        };
+      });
+
+      state.reportRows.forEach(row => {
+        const key = String(row.code || "").toUpperCase();
+        if (!key) return;
+        if (!map[key]) {
+          map[key] = {
+            code: row.code,
+            name: row.name,
+            department: row.dept,
+            position: row.pos,
+            fromEmployees: false,
+            days: {},
+            total: 0
+          };
+        }
+
+        const mins = Number(row.hours ?? row.hrs ?? row.workMinutes ?? 0);
+
+        // Only use DTR profile values when employee is not found in Employees sheet.
+        if (!map[key].fromEmployees) {
+          map[key].name = row.name || map[key].name;
+          map[key].department = row.dept || map[key].department;
+          map[key].position = row.pos || map[key].position;
+        }
+
+        map[key].days[row.date] = (map[key].days[row.date] || 0) + mins;
+        map[key].total += mins;
+      });
+
+      let rows = Object.values(map).filter(row => {
+        if (dept && row.department !== dept) return false;
+        if (pos && row.position !== pos) return false;
+        return true;
+      });
+
+      rows.sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
+      return { dates, rows };
+    }
+
+    function normalizeCode(code) {
+      return String(code || "").trim().toUpperCase();
+    }
+
+    function getFilteredReportRows() {
+      const built = buildReportRows();
+      const search = String(document.getElementById("reportSearch")?.value || "").trim().toLowerCase();
+      if (!search) return built;
+
+      built.rows = built.rows.filter(row => [
+        row.code,
+        row.name,
+        row.department,
+        row.position
+      ].some(value => String(value || "").toLowerCase().includes(search)));
+      return built;
+    }
+
+    function updateSelectedCount() {
+      const selected = state.selectedReportCodes ? state.selectedReportCodes.size : 0;
+      const selectedEl = document.getElementById("selectedCount");
+      if (selectedEl) selectedEl.textContent = selected;
+    }
+
+    function toggleReportSelection(code, checked) {
+      const key = normalizeCode(code);
+      if (!key) return;
+      if (checked) state.selectedReportCodes.add(key);
+      else state.selectedReportCodes.delete(key);
+      updateSelectedCount();
+      renderReport();
+    }
+
+    function toggleAllReportSelection(checked) {
+      const built = getFilteredReportRows();
+      built.rows.forEach(row => {
+        const key = normalizeCode(row.code);
+        if (!key) return;
+        if (checked) state.selectedReportCodes.add(key);
+        else state.selectedReportCodes.delete(key);
+      });
+      updateSelectedCount();
+      renderReport();
+    }
+
+    function renderReport() {
+      const built = getFilteredReportRows();
+      const dates = built.dates;
+      const rows = built.rows;
+      const head = document.getElementById("reportHead");
+      const body = document.getElementById("reportBody");
+      const table = document.getElementById("reportTable");
+
+      table.style.minWidth = Math.max(1220, 660 + dates.length * 104) + "px";
+
+      const allVisibleSelected = rows.length > 0 && rows.every(row => state.selectedReportCodes.has(normalizeCode(row.code)));
+
+      head.innerHTML = `<tr>
+        <th class="select-col center"><input type="checkbox" id="selectAllReport" ${allVisibleSelected ? "checked" : ""} onchange="toggleAllReportSelection(this.checked)" title="Select all visible employees"></th>
+        <th class="col-num">#</th>
+        <th class="col-name">Name</th>
+        <th class="col-dept">Department</th>
+        <th class="col-pos">Position</th>
+        <th class="col-total center">Total</th>
+        ${dates.map(d => `<th class="date-col center">${formatDateHead(d)}</th>`).join("")}
+      </tr>`;
+
+      if (!rows.length) {
+        body.innerHTML = `<tr><td colspan="${6 + dates.length}" class="empty-state">No employees or attendance records found.</td></tr>`;
+      } else {
+        body.innerHTML = rows.map((row, index) => {
+          const codeKey = normalizeCode(row.code);
+          const checked = state.selectedReportCodes.has(codeKey) ? "checked" : "";
+          const dayCells = dates.map(d => {
+            const mins = row.days[d] || 0;
+            if (!mins) return `<td class="dash">-</td>`;
+            return `<td class="time-cell" title="${escapeHtml(row.name)} · ${formatDateHead(d)}">${minutesToHMS(mins)}</td>`;
+          }).join("");
+
+          return `<tr>
+            <td class="select-col center"><input type="checkbox" ${checked} onchange="toggleReportSelection('${escapeAttr(row.code)}', this.checked)" title="Select ${escapeAttr(row.name)} for DTR export"></td>
+            <td class="col-num"><span class="orange-flag">1</span>${index + 1}</td>
+            <td class="col-name"><span class="truncate" title="${escapeHtml(row.name)}">${escapeHtml(row.name || "")}</span></td>
+            <td class="col-dept"><span class="truncate" title="${escapeHtml(row.department)}">${escapeHtml(row.department || "")}</span></td>
+            <td class="col-pos"><span class="truncate" title="${escapeHtml(row.position)}">${escapeHtml(row.position || "")}</span></td>
+            <td class="col-total time-cell">${minutesToHMS(row.total)}</td>
+            ${dayCells}
+          </tr>`;
+        }).join("");
+      }
+
+      document.getElementById("employeeCount").textContent = rows.length;
+      document.getElementById("reportStatus").innerHTML = `Showing <strong>${rows.length}</strong> employee(s) · <strong>${dates.length}</strong> day(s)`;
+      updateSelectedCount();
+    }
+
+    function toMinutesFromHMS(value) {
+      const parts = String(value || "").split(":").map(Number);
+      if (!parts.length || isNaN(parts[0])) return 0;
+      return (parts[0] || 0) * 60 + (parts[1] || 0);
+    }
+
+    function formatPeriodDate(iso) {
+      const d = parseIso(iso);
+      return pad(d.getDate()) + " " + monthNames[d.getMonth()].toUpperCase() + " " + d.getFullYear();
+    }
+
+    function dtrRowsForEmployee(code, from, to) {
+      const codeKey = normalizeCode(code);
+      return (state.dtrRows || [])
+        .filter(row => normalizeCode(row.code) === codeKey && row.date >= from && row.date <= to)
+        .sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")));
+    }
+
+    function buildDailyMap(rows) {
+      const map = {};
+      rows.forEach(row => {
+        const d = parseIso(row.date);
+        const day = d.getDate();
+        map[day] = row;
+      });
+      return map;
+    }
+
+    function splitTimeParts(value) {
+      const parts = String(value || "").split(":").map(Number);
+      return {
+        h: isNaN(parts[0]) ? 0 : (parts[0] || 0),
+        m: isNaN(parts[1]) ? 0 : (parts[1] || 0)
+      };
+    }
+
+    function buildDtrSlip(employee, from, to) {
+      const rows = dtrRowsForEmployee(employee.code, from, to);
+      const daily = buildDailyMap(rows);
+      const period = formatPeriodDate(from) + " - " + formatPeriodDate(to);
+
+      const bodyRows = Array.from({ length: 31 }, (_, i) => {
+        const day = i + 1;
+        const r = daily[day] || {};
+        return `<tr>
+          <td class="dtr-day">${day}</td>
+          <td>${escapeHtml(r.arrival || "")}</td>
+          <td>${escapeHtml(r.breakStart || "")}</td>
+          <td>${escapeHtml(r.breakEnd || "")}</td>
+          <td>${escapeHtml(r.departure || "")}</td>
+          <td></td>
+          <td></td>
+        </tr>`;
+      }).join("");
+
+      return `<section class="dtr-slip">
+        <div class="dtr-logo-area">
+          <div class="logo-mark">LOGO</div>
+          <div class="logo-name">SOGA</div>
+          <div class="logo-sub">MANPOWER AGENCY</div>
+        </div>
+
+        <div class="dtr-title">DAILY TIME RECORD</div>
+        <div class="dtr-ornament">-----o0o-----</div>
+
+        <div class="dtr-name-line"><span>${escapeHtml(employee.name || "")}</span></div>
+        <div class="dtr-label">NAME</div>
+
+        <div class="dtr-period-line"><span>${escapeHtml(period)}</span></div>
+        <div class="dtr-label period-label">Period Covered</div>
+
+        <table class="dtr-table">
+          <colgroup>
+            <col class="day-col" />
+            <col class="time-col" />
+            <col class="time-col" />
+            <col class="time-col" />
+            <col class="time-col" />
+            <col class="under-col" />
+            <col class="under-col" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th rowspan="2" class="dtr-day">Day</th>
+              <th colspan="2" class="group-head">A.M.</th>
+              <th colspan="2" class="group-head">P.M.</th>
+              <th colspan="2" class="group-head">Undertime</th>
+            </tr>
+            <tr>
+              <th>Arrival</th>
+              <th>Depar-<br>ture</th>
+              <th>Arrival</th>
+              <th>Depar-<br>ture</th>
+              <th>Hours</th>
+              <th>Min-<br>utes</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${bodyRows}
+            <tr class="dtr-total-row">
+              <td colspan="5" class="dtr-total-label">Total</td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>`;
+    }
+
+    function buildDtrPrintHtml(selectedEmployees, from, to) {
+      return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>DTR Export</title>
+<style>
+  @page { size: A4 portrait; margin: 6mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; color: #000; background: #fff; }
+  .print-page {
+    width: 198mm;
+    min-height: 285mm;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5mm;
+    page-break-after: always;
+    break-after: page;
+  }
+  .print-page:last-child { page-break-after: auto; break-after: auto; }
+  .dtr-slip {
+    height: 285mm;
+    padding: 4mm 1mm 2mm;
+    overflow: hidden;
+    background: #fff;
+  }
+  .dtr-slip.blank { visibility: hidden; }
+
+  .dtr-logo-area {
+    height: 28mm;
+    display: grid;
+    grid-template-columns: 22mm 1fr;
+    grid-template-rows: 15mm 8mm;
+    align-items: center;
+    justify-content: center;
+    column-gap: 2mm;
+    max-width: 72mm;
+    margin: 0 auto 2mm;
+  }
+  .logo-mark {
+    grid-row: 1 / 3;
+    width: 21mm;
+    height: 21mm;
+    border: 2.4mm solid #000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6px;
+    font-weight: 900;
+    letter-spacing: .4px;
+  }
+  .logo-name {
+    font-size: 30px;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -1px;
+  }
+  .logo-sub {
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .2px;
+    align-self: start;
+  }
+
+  .dtr-title {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: .5px;
+    line-height: 1;
+    margin-top: 1mm;
+  }
+  .dtr-ornament {
+    text-align: center;
+    font-size: 7px;
+    line-height: 1;
+    margin: 1mm 0 8mm;
+  }
+  .dtr-name-line,
+  .dtr-period-line {
+    border-top: 2.6px solid #000;
+    height: 10mm;
+    display: flex;
+    align-items: end;
+    justify-content: center;
+    text-align: center;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+  .dtr-name-line span,
+  .dtr-period-line span {
+    transform: translateY(3.15mm);
+    background: #fff;
+    padding: 0 2.5mm;
+    line-height: 1;
+    max-width: 86mm;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .dtr-name-line span {
+    font-size: 10px;
+    letter-spacing: .35px;
+  }
+  .dtr-period-line span {
+    font-size: 9px;
+    letter-spacing: .15px;
+  }
+  .dtr-label {
+    text-align: center;
+    font-size: 9px;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: .3px;
+    margin: 1.2mm 0 5.5mm;
+  }
+  .period-label {
+    font-size: 10px;
+    letter-spacing: .1px;
+    margin-bottom: 2.6mm;
+  }
+
+  .dtr-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 6.2px;
+    line-height: 1;
+  }
+  .dtr-table th,
+  .dtr-table td {
+    border: 1px solid #111;
+    height: 5.15mm;
+    text-align: center;
+    vertical-align: middle;
+    padding: 0;
+    font-weight: 700;
+  }
+  .dtr-table thead th {
+    height: 5.5mm;
+    font-weight: 900;
+    background: #fff;
+  }
+  .dtr-table thead tr:first-child th {
+    font-size: 7.5px;
+  }
+  .dtr-table thead tr:nth-child(2) th {
+    font-size: 6.2px;
+  }
+  .dtr-day,
+  .day-col { width: 8mm; }
+  .time-col { width: 16.4mm; }
+  .under-col { width: 15.5mm; }
+  .group-head { border-bottom-width: 1px; }
+  .dtr-table th:nth-child(2),
+  .dtr-table td:nth-child(2),
+  .dtr-table th:nth-child(4),
+  .dtr-table td:nth-child(4),
+  .dtr-table th:nth-child(6),
+  .dtr-table td:nth-child(6) { border-left-width: 2px; }
+  .dtr-total-row td {
+    height: 5.2mm;
+    font-size: 8px;
+    font-weight: 900;
+  }
+  .dtr-total-label {
+    text-align: right !important;
+    padding-right: 2mm !important;
+  }
+
+  @media screen {
+    body { background: #d1d5db; padding: 10px; }
+    .print-page { background: #fff; margin: 0 auto 12px; padding: 0; box-shadow: 0 4px 18px rgba(0,0,0,.2); }
+  }
+</style>
+</head>
+<body>
+${selectedEmployees.reduce((html, _, index) => {
+  if (index % 2 === 0) html += '<div class="print-page">';
+  html += selectedEmployees[index] ? buildDtrSlip(selectedEmployees[index], from, to) : '<section class="dtr-slip blank"></section>';
+  if (index % 2 === 1 || index === selectedEmployees.length - 1) html += index % 2 === 0 ? '<section class="dtr-slip blank"></section></div>' : '</div>';
+  return html;
+}, "")}
+<script>window.onload = function(){ setTimeout(function(){ window.print(); }, 300); };<\/script>
+</body>
+</html>`;
+    }
+
+    async function exportSelectedDtr() {
+      const from = document.getElementById("fromDate").value;
+      const to = document.getElementById("toDate").value;
+      const selectedCodes = Array.from(state.selectedReportCodes || []);
+
+      if (!selectedCodes.length) {
+        alert("Please tick at least one employee to export DTR.");
+        return;
+      }
+
+      if (!state.dtrRows || !state.dtrRows.length) {
+        await loadDtrRows();
+      }
+
+      const built = buildReportRows();
+      const employeesByCode = {};
+      built.rows.forEach(row => employeesByCode[normalizeCode(row.code)] = row);
+
+      const selectedEmployees = selectedCodes
+        .map(code => employeesByCode[normalizeCode(code)])
+        .filter(Boolean)
+        .sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
+
+      if (!selectedEmployees.length) {
+        alert("Selected employees are not in the current report range.");
+        return;
+      }
+
+      const html = buildDtrPrintHtml(selectedEmployees, from, to);
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) {
+        alert("Popup blocked. Please allow popups for this site, then export again.");
+        return;
+      }
+      printWindow.document.open();
+      printWindow.document.write(html);
+      printWindow.document.close();
+    }
+
+    function renderDtrRecords() {
+      const body = document.getElementById("dtrRecordsBody");
+      const count = document.getElementById("dtrRecordCount");
+      const search = String(document.getElementById("dtrSearch")?.value || "").trim().toLowerCase();
+      if (!body) return;
+
+      const rows = (state.dtrRows || []).filter(row => {
+        if (!search) return true;
+        return [
+          row.date,
+          row.name,
+          row.department,
+          row.position,
+          row.arrival,
+          row.breakStart,
+          row.shortBreakStart,
+          row.breakEnd,
+          row.shortBreakEnd,
+          row.departure,
+          row.lastAction,
+          row.workHours
+        ].some(value => String(value || "").toLowerCase().includes(search));
+      });
+
+      if (count) count.textContent = rows.length + " record(s)";
+
+      if (!rows.length) {
+        body.innerHTML = `<tr><td colspan="12" class="empty-state">No DTR records found.</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = rows.map(row => `<tr>
+        <td class="center date-cell">${escapeHtml(row.date || "")}</td>
+        <td class="strong">${escapeHtml(row.name || "")}</td>
+        <td>${escapeHtml(row.department || "")}</td>
+        <td>${escapeHtml(row.position || "")}</td>
+        <td class="center">${escapeHtml(row.arrival || "")}</td>
+        <td class="center">${escapeHtml(row.breakStart || "")}</td>
+        <td class="center">${escapeHtml(row.shortBreakStart || "")}</td>
+        <td class="center">${escapeHtml(row.breakEnd || "")}</td>
+        <td class="center">${escapeHtml(row.shortBreakEnd || "")}</td>
+        <td class="center">${escapeHtml(row.departure || "")}</td>
+        <td>${escapeHtml(row.lastAction || "")}</td>
+        <td class="center strong">${escapeHtml(row.workHours || "")}</td>
+      </tr>`).join("");
+    }
+
+    function renderEmployeeTable() {
+      const body = document.getElementById("employeeTableBody");
+      if (!state.employees.length) {
+        body.innerHTML = `<tr><td colspan="6" class="empty-state">No employees yet.</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = state.employees.map((emp, index) => `<tr>
+        <td>${index + 1}</td>
+        <td>${escapeHtml(emp.code)}</td>
+        <td>${escapeHtml(emp.name)}</td>
+        <td>${escapeHtml(emp.department)}</td>
+        <td>${escapeHtml(emp.position)}</td>
+        <td>
+          <button class="icon-btn" onclick="previewQr('${escapeAttr(emp.code)}')">Preview</button>
+          <button class="icon-btn" onclick="editEmployee('${escapeAttr(emp.code)}')">Edit</button>
+          <button class="icon-btn" onclick="deleteEmployeeRow('${escapeAttr(emp.code)}')">Delete</button>
+        </td>
+      </tr>`).join("");
+    }
+
+    function employeeByCode(code) {
+      return state.employees.find(e => String(e.code).toUpperCase() === String(code || "").toUpperCase()) || null;
+    }
+
+    function buildEmployeeQrUrl(code) {
+      return KIOSK_URL + "?view=employee&employee=" + encodeURIComponent(code);
+    }
+
+    async function previewQr(code) {
+      const emp = employeeByCode(code);
+      if (!emp) return;
+
+      state.selectedQrEmployee = emp;
+      document.getElementById("qrName").textContent = emp.name;
+      document.getElementById("qrCodeText").textContent = "Code: " + emp.code;
+      document.getElementById("qrUrlText").textContent = "Fetching QR image from Google Drive...";
+
+      const box = document.getElementById("qrBox");
+      box.innerHTML = `<span style="color:#98a2b3;font-size:12px;">Loading from Drive...</span>`;
+      state.currentQrDataUrl = "";
+
+      try {
+        const result = await jsonpRequest({
+          action: "getQR",
+          code: emp.code,
+          name: emp.name
+        });
+
+        if (!result.ok) throw new Error(result.error || "Could not fetch QR from Google Drive.");
+        if (!result.dataUrl) throw new Error("QR file was not returned from Google Drive.");
+
+        state.currentQrDataUrl = result.dataUrl;
+        box.innerHTML = `<img src="${result.dataUrl}" alt="QR Code" />`;
+        document.getElementById("qrUrlText").textContent = "Drive file: " + (result.fileName || "QR PNG");
+      } catch (err) {
+        box.innerHTML = `<span style="color:#dc2626;font-size:12px;">QR not found in Drive.</span>`;
+        document.getElementById("qrUrlText").textContent = err.message;
+      }
+    }
+
+    function editEmployee(code) {
+      const emp = employeeByCode(code);
+      if (!emp) return;
+      document.getElementById("empCode").value = emp.code;
+      document.getElementById("empName").value = emp.name;
+      document.getElementById("empDepartment").value = emp.department || "";
+      document.getElementById("empPosition").value = emp.position || "";
+      document.getElementById("empShift").value = emp.shift || "morning";
+      scheduleState = parseScheduleString(emp.schedule || "");
+      renderScheduleEditor();
+      previewQr(code);
+      setMessage("employeeMessage", "Employee loaded for editing.");
+    }
+
+    function clearEmployeeForm() {
+      ["empCode", "empName", "empDepartment", "empPosition"].forEach(id => document.getElementById(id).value = "");
+      document.getElementById("empShift").value = "morning";
+      scheduleState = defaultScheduleState();
+      renderScheduleEditor();
+      setMessage("employeeMessage", "Ready.");
+    }
+
+    async function saveEmployee() {
+      const code = document.getElementById("empCode").value.trim().toUpperCase();
+      const name = document.getElementById("empName").value.trim();
+      const department = document.getElementById("empDepartment").value.trim();
+      const position = document.getElementById("empPosition").value.trim();
+      const shift = document.getElementById("empShift").value;
+      const schedule = buildScheduleString();
+
+      if (!code || !name) {
+        setMessage("employeeMessage", "Employee code and name are required.", "err");
+        return;
+      }
+
+      if (!schedule) {
+        setMessage("employeeMessage", "Please tick at least one working day in the schedule.", "err");
+        return;
+      }
+
+      setMessage("employeeMessage", "Saving employee and generating QR in Drive...");
+      try {
+        const result = await sendData({
+          type: "employee",
+          employeeCode: code,
+          employeeName: name,
+          department,
+          position,
+          shift,
+          schedule
+        });
+
+        if (!result.ok) throw new Error(result.error || "Save failed.");
+        setMessage("employeeMessage", "Saved. QR file created in Employee QR Codes Drive folder: " + (result.qrFile || ""), "ok");
+        await loadEmployees();
+        populateFilters();
+        renderReport();
+        await previewQr(code);
+      } catch (err) {
+        setMessage("employeeMessage", err.message, "err");
+      }
+    }
+
+    async function deleteEmployeeRow(code) {
+      const emp = employeeByCode(code);
+      if (!emp) return;
+      if (!confirm("Delete employee " + emp.name + "?")) return;
+      setMessage("employeeMessage", "Deleting employee...");
+      try {
+        const result = await sendData({ type: "deleteEmployee", employeeCode: emp.code });
+        if (!result.ok) throw new Error(result.error || "Delete failed.");
+        setMessage("employeeMessage", "Employee deleted.", "ok");
+        await loadEmployees();
+        renderReport();
+      } catch (err) {
+        setMessage("employeeMessage", err.message, "err");
+      }
+    }
+
+    async function generateAllQrs() {
+      setMessage("employeeMessage", "Generating QR codes for all employees...");
+      try {
+        const result = await jsonpRequest({ action: "generateAllQRs" });
+        if (!result.ok) throw new Error(result.error || "QR generation failed.");
+        setMessage("employeeMessage", "Generated " + result.saved + " QR file(s) in Employee QR Codes Drive folder.", "ok");
+      } catch (err) {
+        setMessage("employeeMessage", err.message, "err");
+      }
+    }
+
+    async function saveSelectedQrToDrive() {
+      const emp = state.selectedQrEmployee;
+      if (!emp) {
+        setMessage("employeeMessage", "Select an employee first.", "err");
+        return;
+      }
+      setMessage("employeeMessage", "Saving QR to Drive...");
+      try {
+        const result = await sendData({
+          type: "saveQR",
+          employeeCode: emp.code,
+          employeeName: emp.name
+        });
+        if (!result.ok) throw new Error(result.error || "Could not save QR.");
+        setMessage("employeeMessage", "QR saved to Drive: " + result.fileName, "ok");
+        await previewQr(emp.code);
+      } catch (err) {
+        setMessage("employeeMessage", err.message, "err");
+      }
+    }
+
+    function downloadSelectedQr() {
+      const emp = state.selectedQrEmployee;
+      if (!emp || !state.currentQrDataUrl) {
+        setMessage("employeeMessage", "Select an employee first.", "err");
+        return;
+      }
+      const a = document.createElement("a");
+      a.href = state.currentQrDataUrl;
+      a.download = "QR_" + emp.code + "_" + String(emp.name).replace(/\s+/g, "_") + ".png";
+      a.click();
+    }
+
+    function renderKioskEmployee() {
+      const code = document.getElementById("kioskCode").value.trim().toUpperCase();
+      const emp = employeeByCode(code);
+      const box = document.getElementById("kioskEmployeeBox");
+
+      if (!code) {
+        box.className = "message";
+        box.textContent = "No employee selected.";
+        return null;
+      }
+
+      if (!emp) {
+        box.className = "message err";
+        box.textContent = "Employee code not found.";
+        return null;
+      }
+
+      box.className = "message ok";
+      box.textContent = emp.name + " · " + emp.department + " · " + emp.position;
+      return emp;
+    }
+
+    async function submitKioskAction(action) {
+      const emp = renderKioskEmployee();
+      if (!emp) {
+        setMessage("kioskMessage", "Employee code not found.", "err");
+        return;
+      }
+
+      const now = new Date();
+      const date = isoDate(now);
+      const time = currentTime();
+      const labels = {
+        arrival: "Arrived",
+        breakStart: "Break Start",
+        breakEnd: "Break End",
+        departure: "Departure"
+      };
+
+      const payload = {
+        type: "attendance",
+        date,
+        employeeCode: emp.code,
+        employeeName: emp.name,
+        department: emp.department,
+        position: emp.position,
+        lastAction: labels[action],
+        timestamp: now.toISOString(),
+        source: "qr-kiosk"
+      };
+      payload[action] = time;
+
+      setMessage("kioskMessage", "Saving " + labels[action] + "...");
+      try {
+        const result = await sendData(payload);
+        if (!result.ok) throw new Error(result.error || "Attendance save failed.");
+        setMessage("kioskMessage", emp.name + " · " + labels[action] + " saved at " + time + ".", "ok");
+        await refreshReport();
+      } catch (err) {
+        setMessage("kioskMessage", err.message, "err");
+      }
+    }
+
+    function showView(view) {
+      const report = document.getElementById("reportView");
+      const employees = document.getElementById("employeesView");
+      const kiosk = document.getElementById("kioskView");
+      report.classList.toggle("active", view === "report");
+      employees.classList.toggle("active", view === "employees");
+      kiosk.classList.toggle("active", view === "kiosk");
+
+      document.getElementById("reportNav").classList.toggle("active", view === "report");
+      document.getElementById("employeesNav").classList.toggle("active", view === "employees");
+      document.getElementById("kioskNav").classList.toggle("active", view === "kiosk");
+
+      document.getElementById("pageTitle").textContent = view === "report" ? "Executors" : view === "employees" ? "Employee QR Codes" : "DTR Records";
+      if (view === "kiosk") loadDtrRows().catch(function(err) { console.error(err); });
+    }
+
+    function handleUrlKiosk() {
+      // Admin /DTR page no longer contains the employee punch kiosk.
+      // Employee QR codes should open https://decosite.github.io/kioskdtr/index.html.
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replaceAll("`", "&#096;");
+    }
+
+    function attachEvents() {
+      document.getElementById("reportNav").addEventListener("click", () => showView("report"));
+      document.getElementById("employeesNav").addEventListener("click", () => showView("employees"));
+      document.getElementById("kioskNav").addEventListener("click", () => showView("kiosk"));
+      document.getElementById("printBtn").addEventListener("click", exportSelectedDtr);
+      document.getElementById("openDriveBtn").addEventListener("click", () => window.open(QR_DRIVE_URL, "_blank"));
+
+      document.getElementById("prevRangeBtn").addEventListener("click", () => shiftDateRange(-1));
+      document.getElementById("nextRangeBtn").addEventListener("click", () => shiftDateRange(1));
+      document.getElementById("fromDate").addEventListener("change", () => { syncMonthYearFromFromDate(); refreshReport(); });
+      document.getElementById("toDate").addEventListener("change", refreshReport);
+      document.getElementById("monthSelect").addEventListener("change", applyMonthYearToRange);
+      document.getElementById("yearInput").addEventListener("change", applyMonthYearToRange);
+      document.getElementById("departmentFilter").addEventListener("change", renderReport);
+      document.getElementById("positionFilter").addEventListener("change", renderReport);
+      const reportSearch = document.getElementById("reportSearch");
+      if (reportSearch) reportSearch.addEventListener("input", renderReport);
+
+      document.getElementById("saveEmployeeBtn").addEventListener("click", saveEmployee);
+      document.getElementById("clearEmployeeFormBtn").addEventListener("click", clearEmployeeForm);
+      document.getElementById("generateAllQrBtn").addEventListener("click", generateAllQrs);
+      document.getElementById("downloadQrBtn").addEventListener("click", downloadSelectedQr);
+      document.getElementById("saveQrBtn").addEventListener("click", saveSelectedQrToDrive);
+      document.getElementById("empShift").addEventListener("change", updateDutySummary);
+
+      const dtrSearch = document.getElementById("dtrSearch");
+      if (dtrSearch) dtrSearch.addEventListener("input", renderDtrRecords);
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      setupMonthOptions();
+      setDefaultDates();
+      renderScheduleEditor();
+      attachEvents();
+      refreshAll();
+
+      setInterval(() => {
+        if (document.visibilityState !== "visible") return;
+
+        const dtrView = document.getElementById("kioskView");
+        const reportView = document.getElementById("reportView");
+
+        if (dtrView && dtrView.classList.contains("active")) {
+          loadDtrRows().catch(function(err) { console.error(err); });
+          return;
+        }
+
+        if (reportView && reportView.classList.contains("active")) {
+          Promise.all([refreshReport(), loadDtrRows()]).catch(function(err) { console.error(err); });
+        }
+      }, 15000);
+    });
+  </script>
 </body>
 </html>
