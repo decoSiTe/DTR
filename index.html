@@ -1893,9 +1893,14 @@ tbody tr:hover td,
       const end = timeToMinutes(endValue);
       if (start === null || end === null) return 0;
 
-      let diff = end - start;
-      if (diff < 0) diff += 24 * 60;
-      return Math.max(0, diff);
+      // Do not treat a normal daytime mistake like 11:06 → 11:04 as 23:58.
+      // Only allow overnight break calculation for evening-to-early-morning pairs.
+      if (end < start) {
+        const looksOvernight = start >= (18 * 60) && end <= (6 * 60);
+        return looksOvernight ? (end + 24 * 60 - start) : 0;
+      }
+
+      return end - start;
     }
 
     function calcTotalBreakMinutes(row) {
