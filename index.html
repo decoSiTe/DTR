@@ -1903,9 +1903,65 @@ tbody tr:hover td,
       return end - start;
     }
 
+    function diffAcrossDatePair(startDate, startValue, endDate, endValue) {
+      const start = timeToMinutes(startValue);
+      const end = timeToMinutes(endValue);
+      if (start === null || end === null || !startDate || !endDate) return 0;
+
+      const dayDiff = Math.round((parseIso(endDate) - parseIso(startDate)) / 86400000);
+      const mins = (dayDiff * 1440) + end - start;
+
+      // Valid cross-date break, for example 23:45 → 00:40 next day = 55 minutes.
+      // Ignore impossible matches that are too long.
+      return mins > 0 && mins <= 12 * 60 ? mins : 0;
+    }
+
+    function findOpenBreakStartRow(row, startField, endField) {
+      const codeKey = normalizeCode(row.code);
+      if (!codeKey || !row.date) return null;
+
+      return (state.dtrRows || [])
+        .filter(r =>
+          r !== row &&
+          normalizeCode(r.code) === codeKey &&
+          String(r.date || "") <= String(row.date || "") &&
+          String(r[startField] || "").trim() &&
+          !String(r[endField] || "").trim()
+        )
+        .sort((a, b) => {
+          const byDate = String(b.date || "").localeCompare(String(a.date || ""));
+          if (byDate) return byDate;
+          return String(b[startField] || "").localeCompare(String(a[startField] || ""));
+        })[0] || null;
+    }
+
+    function calcCrossDateBreakMinutes(row) {
+      let total = 0;
+
+      // Break End entered after midnight with Break Start on the previous date.
+      if (!String(row.breakStart || "").trim() && String(row.breakEnd || "").trim()) {
+        const startRow = findOpenBreakStartRow(row, "breakStart", "breakEnd");
+        if (startRow) {
+          total += diffAcrossDatePair(startRow.date, startRow.breakStart, row.date, row.breakEnd);
+        }
+      }
+
+      // Short Break End entered after midnight with Short Break Start on the previous date.
+      if (!String(row.shortBreakStart || "").trim() && String(row.shortBreakEnd || "").trim()) {
+        const shortStartRow = findOpenBreakStartRow(row, "shortBreakStart", "shortBreakEnd");
+        if (shortStartRow) {
+          total += diffAcrossDatePair(shortStartRow.date, shortStartRow.shortBreakStart, row.date, row.shortBreakEnd);
+        }
+      }
+
+      return total;
+    }
+
     function calcTotalBreakMinutes(row) {
-      return diffTimePair(row.breakStart, row.breakEnd) +
-             diffTimePair(row.shortBreakStart, row.shortBreakEnd);
+      const sameRowMins = diffTimePair(row.breakStart, row.breakEnd) +
+                          diffTimePair(row.shortBreakStart, row.shortBreakEnd);
+      if (sameRowMins > 0) return sameRowMins;
+      return calcCrossDateBreakMinutes(row);
     }
 
     function calcTotalBreakHMS(row) {
